@@ -15,7 +15,9 @@ export default function RootLayout({ children }) {
         <div className="bgImage">
           <div className="bgEffect"></div>
         </div>
-        {children}
+        <main className="w-screen min-h-screen flex items-center justify-center p-2">
+          {children}
+        </main>
       </body>
     </html>
   );
