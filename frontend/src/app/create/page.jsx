@@ -1,13 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 import { FaRegCopy } from "react-icons/fa";
 import { RiUserReceived2Line } from "react-icons/ri";
+import { TbJson } from "react-icons/tb";
+
+import { Codesnippet } from "../components/codesnippet";
 
 export default function CreateGame() {
   const [username, setUsername] = useState("");
   const [gameCode, setGameCode] = useState("");
+
+  const [showCodeSnippet, setShowCodeSnippet] = useState(false);
+  const snippetRef = useRef(null);
 
   const [gameSettings, setGameSettings] = useState({
     maxPlayers: -1,
@@ -27,6 +33,10 @@ export default function CreateGame() {
     }
   };
 
+  const handleCodeSnippet = () => {
+    setShowCodeSnippet(!showCodeSnippet);
+  };
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
 
@@ -34,7 +44,6 @@ export default function CreateGame() {
       alert("Please select a file");
       return;
     }
-
     if (file.type !== "application/json") {
       alert("Please select a json file");
       return;
@@ -44,7 +53,7 @@ export default function CreateGame() {
 
   return (
     <>
-      <div className="container w-1/3 bg-black/50 p-2 shadow-lg">
+      <div className="container w-1/2 bg-black/50 p-2 shadow-lg">
         <h1 className="text-center bg-white/20 rounded-md p-2 text-white tracking-wide uppercase text-md">
           Create Game
         </h1>
@@ -236,6 +245,11 @@ export default function CreateGame() {
               onChange={handleFileChange}
               required
             />
+
+            <button className="min-w-max flex items-center gap-2 p-2 rounded-lg bg-white/20 text-white " onClick={handleCodeSnippet}>
+              Code Snippet
+              <TbJson />
+            </button>
           </div>
         </div>
 
@@ -248,6 +262,7 @@ export default function CreateGame() {
           </button>
         </div>
       </div>
+      {showCodeSnippet && <Codesnippet ref={snippetRef} clickedOutside={handleCodeSnippet} />}
     </>
   );
 }

@@ -1,19 +1,39 @@
 'use client'
 
 import { CopyBlock, dracula } from 'react-code-blocks';
+import React, { useEffect } from 'react';
 
-export const Codesnippet = () => {
+export const Codesnippet = React.forwardRef(({ clickedOutside }, ref) => {
+  const handleClickOutside = (e) => {
+    if (ref.current && !ref.current.contains(e.target)) {
+      clickedOutside();
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [ref]);
+
   return (
-    <CopyBlock
-      text={code}
-      language={'javascript'}
-      showLineNumbers={true}
-      copied={true}
-      theme={dracula}
-      wrapLines
-    />
+    <div className="codeSnippet absolute w-full flex justify-center items-center inset-0">
+      <div className="codeSnippetEffect z-10 bg-black/60 inset-0 w-screen h-screen"></div>
+      <div className="absolute z-20" ref={ref}>
+        <CopyBlock
+          text={code}
+          language={"javascript"}
+          showLineNumbers={true}
+          copied={true}
+          theme={dracula}
+          wrapLines
+        />
+      </div>
+    </div>
   );
-}
+});
+
 const code = `
 {
   "game": [
