@@ -1,13 +1,10 @@
-const express = require('express');
-const app = express();
-const PORT = process.env.PORT || 5000;
+const server = require('./app/server/server');
+const socketHandler = require('./app/socket/socket');
 
-app.use(express.json());
+// Initialize socket handler
+socketHandler(server);
 
-app.get('/', (req, res) => {
-  res.send('Kahoot Clone Backend');
-});
-
-app.listen(PORT, () => {
+const PORT = process.env.PORT || 5050;
+server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
