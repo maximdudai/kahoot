@@ -8,7 +8,8 @@ import { Codesnippet } from "@/app/components/codesnippet";
 
 import { io } from "socket.io-client";
 
-import { generateGameId, generateUniqueId } from "@/app/utils/gameid";
+import { generateGameId } from "@/app/utils/gameid";
+import { generateUniqueId } from "@/app/utils/playerid";
 
 export const CreateNewGame = ({ updateStep }) => {
   const [gameCode, setGameCode] = useState("");
@@ -17,19 +18,41 @@ export const CreateNewGame = ({ updateStep }) => {
   const [gameSettings, setGameSettings] = useState({
     maxPlayers: -1,
     time: 30,
-    gameCode: "",
+    gameCode: '',
     file: null,
-    creator: "",
   });
 
   const socket = useRef(null);
 
   useEffect(() => {
-    // Initialize the socket connection
-    socket.current = io("http://localhost:5050");
+    // Use the actual IP address of the server
+    socket.current = io('http://192.168.1.180:5050'); // Replace with your server's actual IP address
 
+    socket.current.on('connect', () => {
+      console.log('Connected to the server');
+
+      socket.current.on('client-create-game', (data) => {
+        console.log('Received create-game event:', data);
+      });
+
+      socket.current.on('player-join', (data) => {
+        console.log('Player joined:', data);
+        setTotalPlayers((prevPlayers) => [...prevPlayers, data.player]);
+        setPlayers((prevPlayers) => prevPlayers + 1);
+      });
+
+      socket.current.on('player-left', (data) => {
+        setTotalPlayers((prevPlayers) =>
+          prevPlayers.filter((player) => player.id !== data.id)
+        );
+        setPlayers((prevPlayers) => prevPlayers - 1);
+      });
+
+      // Example button to join game
+    });
+
+    // Clean up the socket connection when the component unmounts
     return () => {
-      // Clean up the socket connection when the component unmounts
       socket.current.disconnect();
     };
   }, []);
@@ -48,52 +71,42 @@ export const CreateNewGame = ({ updateStep }) => {
   };
 
   const handleCreateGame = async () => {
-    if (!gameCode || !gameSettings.file) {
-      alert("Please fill in all fields");
-      return;
-    }
-
     const formData = new FormData();
-    formData.append("file", gameSettings.file);
+    formData.append('file', gameSettings.file);
 
     try {
-      const response = await axios.post(
-        "http://localhost:5050/upload",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await axios.post('http://localhost:5050/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
-      // Handle response from server
       if (response.data.success) {
         // Set creator id
-        setGameSettings((prevSettings) => ({
-          ...prevSettings,
-          creator: generateUniqueId(),
-        }));
+        const playerid = generateUniqueId();
+        const newGameSettings = {
+          ...gameSettings,
+          creator: playerid,
+          questions: response.data.data.game,
+        };
+        setGameSettings(newGameSettings);
 
         // Save game settings to local storage
-        localStorage.setItem("gameSettings", JSON.stringify(gameSettings));
+        localStorage.setItem('gameSettings', JSON.stringify(newGameSettings));
 
         // Update step to waiting for players
         updateStep(1);
 
         // Emit game settings to server
-        socket.current.emit("create-game", {
-          ...gameSettings,
-          questions: response.data.data.game,
-        });
+        console.log('Emitting create-game event');
+        socket.current.emit('create-game', newGameSettings);
 
-        console.table(gameSettings);
       } else {
         alert(response.data.message);
       }
     } catch (error) {
-      console.error("Error uploading file:", error);
-      alert("Error uploading file.");
+      console.error('Error uploading file:', error);
+      alert('Error uploading file.');
     }
   };
 
@@ -127,7 +140,7 @@ export const CreateNewGame = ({ updateStep }) => {
           {gameCode && (
             <button
               className="text-white w-12 h-10 ml-2 p-2 bg-white/20 rounded-lg"
-              onClick={() => navigator.clipboard.writeText(gameCode)}
+              onClick={() => navigator?.clipboard?.writeText(gameCode)}
             >
               <FaRegCopy className="m-auto" />
             </button>

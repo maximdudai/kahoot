@@ -1,31 +1,18 @@
-const { Server } = require('socket.io');
-
-const { generateUniqueId } = require('../utils/generateId');
-
-// Object to store game data, where each key is a game ID
 let games = {};
+let totalGames = 0;
 
-module.exports = (server) => {
-  const io = new Server(server, {
-    cors: {
-      origin: 'http://localhost:3000',
-      methods: ['GET', 'POST'],
-    },
-  });
-
+module.exports = (io) => {
   io.on('connection', (socket) => {
     console.log('A user connected');
 
     socket.on('create-game', (gameSettings) => {
-      createGame(io, gameSettings);
+      console.log('Received create-game event');
+      createGame(io, gameSettings, socket);
     });
 
     socket.on('join-game', (data) => {
-      joinGame(io, data);
-    });
-
-    socket.on('cancel-game', (gameId) => {
-      cancelGame(io, gameId);
+      console.log('Received join-game event');
+      joinGame(io, data, socket);
     });
 
     socket.on('disconnect', () => {
@@ -34,40 +21,45 @@ module.exports = (server) => {
   });
 };
 
-function createGame(io, gameSettings) {
-  const gameId = generateUniqueId();
+function createGame(io, gameSettings, socket) {
+  totalGames++;
+  const gameId = totalGames;
+
   games[gameId] = {
-    players: [],
     gameSettings: gameSettings,
-    gameCode: gameSettings.gameCode
+    players: [],
   };
 
-  io.emit('create-game', { gameId, gameSettings });
-  console.log(`Game created with ID: ${gameId}`);
+  console.log(`Creating game with ID: ${gameId} and Code: ${gameSettings.gameCode}`);
+  socket.join(gameId.toString());
+
+  // Emit event to the room after joining
+  io.to(gameId.toString()).emit('create-game', { gameId, gameSettings });
+  console.log(`Game created with ID: ${gameId} and Code: ${gameSettings.gameCode}`);
 }
 
-function joinGame(io, data) {
-  const { gameId, player } = data;
+function joinGame(io, data, socket) {
+  const { gameCode, player } = data;
+  const gameId = findGameByCode(gameCode);
 
-  console.log(games[gameId]);
+  console.log(`Player ${player.username} trying to join game with code: ${gameCode}`);
 
-  if (games[gameId]) {
-
-
+  if (gameId !== null) {
     games[gameId].players.push(player);
-    io.emit('player-join', { gameId, player });
+    socket.join(gameId.toString());
+    io.to(gameId.toString()).emit('player-join', { gameId, player });
     console.log(`Player joined game with ID: ${gameId}`);
   } else {
-    console.error(`Game with ID: ${gameId} does not exist`);
+    socket.emit('error', `Game with code: ${gameCode} not found`);
+    console.error(`Game with code: ${gameCode} not found`);
   }
 }
 
-function cancelGame(io, gameId) {
-  if (games[gameId]) {
-    delete games[gameId];
-    io.emit('cancel-game', gameId);
-    console.log(`Game with ID: ${gameId} cancelled`);
-  } else {
-    console.error(`Game with ID: ${gameId} does not exist`);
+function findGameByCode(code) {
+  for (let gameId in games) {
+    if (games[gameId].gameSettings.gameCode === code) {
+      return gameId;
+    }
   }
+  return null;
 }

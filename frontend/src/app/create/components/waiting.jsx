@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import { io } from "socket.io-client";
 
@@ -8,19 +8,12 @@ export const WaitingPlayers = ({ updateStep }) => {
   const socket = useRef(null);
 
   useEffect(() => {
-    // Initialize the socket connection
-    socket.current = io("http://localhost:5050");
+    // Use the server's IP address
+    socket.current = io('http://192.168.1.180:5050'); // Replace with your server's IP address
 
-    return () => {
-      // Clean up the socket connection when the component unmounts
-      socket.current.disconnect();
-    };
-  }, []);
-
-  useEffect(() => {
-    const handlePlayerJoin = (playerData) => {
-      setTotalPlayers((prevPlayers) => [...prevPlayers, playerData]);
-      
+    const handlePlayerJoin = ({ gameId, player }) => {
+      console.log(`Player joined: ${player.username} in game: ${gameId}`);
+      setTotalPlayers((prevPlayers) => [...prevPlayers, player]);
       setPlayers((prevPlayers) => prevPlayers + 1);
     };
 
@@ -28,18 +21,20 @@ export const WaitingPlayers = ({ updateStep }) => {
       setTotalPlayers((prevPlayers) =>
         prevPlayers.filter((player) => player.id !== playerData.id)
       );
-      
       setPlayers((prevPlayers) => prevPlayers - 1);
     };
 
-    socket.current.on("player-join", handlePlayerJoin);
-    socket.current.on("player-left", handlePlayerLeft);
+    socket.current.on('player-join', handlePlayerJoin);
+    socket.current.on('player-left', handlePlayerLeft);
 
+    // Clean up the socket connection when the component unmounts
     return () => {
-      socket.current.off("player-join", handlePlayerJoin);
-      socket.current.off("player-left", handlePlayerLeft);
+      socket.current.off('player-join', handlePlayerJoin);
+      socket.current.off('player-left', handlePlayerLeft);
+      socket.current.disconnect();
     };
   }, []);
+
 
   const handleCancelGame = () => {
     socket.current.emit("cancel-game");
@@ -53,6 +48,9 @@ export const WaitingPlayers = ({ updateStep }) => {
           {players === 0 ? (
             <h1 className="text-white text-2xl font-semibold">
               Waiting for players...
+              <span>
+                Total: {players} / 4
+              </span>
             </h1>
           ) : (
             <h1 className="text-white text-2xl font-semibold">
@@ -60,32 +58,32 @@ export const WaitingPlayers = ({ updateStep }) => {
             </h1>
           )}
         </div>
-        {
-          players >= 1 && (
-            <div className="playersList">
-              <ul className="text-white">
-                {totalPlayers.map((player, index) => (
-                  <li key={index}>{player.name}</li>
-                ))}
-              </ul>
-            </div>
-          )
-        }
-        {players > 1 && (
-          <button
-            className="startGameButton bg-green-500 text-white px-4 py-2 rounded-md"
-            onClick={() => console.log("Start Game")}
-          >
-            Start Game
-          </button>
+        {players >= 1 && (
+          <div className="playersList w-1/3">
+            <ul className="text-white w-full max-h-80 overflow-y-auto">
+              {totalPlayers.map((player, index) => (
+                <li className="border-b-2 border-gray-300/20 p-2 mr-1 bg-black/20" key={index}>{player.username}</li>
+              ))}
+            </ul>
+          </div>
         )}
+        <div className="flex flex-col my-3 gap-2 w-1/3 items-center">
+          {players >= 1 && (
+            <button
+              className="w-full shadow-lg bg-green-500 text-white px-4 py-2 rounded-md"
+              onClick={() => console.log("Start Game")}
+            >
+              Start Game
+            </button>
+          )}
 
-        <button
-          className="cancelGameButton bg-red-500 text-white px-4 py-2 rounded-md"
-          onClick={handleCancelGame}
-        >
-          Cancel Game
-        </button>
+          <button
+            className="w-full shadow-lg bg-red-500 text-white px-4 py-2 rounded-md"
+            onClick={handleCancelGame}
+          >
+            Cancel Game
+          </button>
+        </div>
       </div>
     </>
   );

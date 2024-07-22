@@ -1,12 +1,12 @@
 // app.js
 const express = require('express');
-const cors = require('cors');
 
 const app = express();
 
+
 // Set up CORS
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: 'http://192.168.1.180:3000',
   methods: ['GET', 'POST'],
 }));
 
