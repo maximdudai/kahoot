@@ -6,56 +6,18 @@ import { FaRegCopy } from "react-icons/fa";
 import { TbJson } from "react-icons/tb";
 import { Codesnippet } from "@/app/components/codesnippet";
 
-import { io } from "socket.io-client";
-
 import { generateGameId } from "@/app/utils/gameid";
-import { generateUniqueId } from "@/app/utils/playerid";
 
-export const CreateNewGame = ({ updateStep }) => {
+export const CreateNewGame = ({ socket, updateStep }) => {
   const [gameCode, setGameCode] = useState("");
   const [showCodeSnippet, setShowCodeSnippet] = useState(false);
   const snippetRef = useRef(null);
   const [gameSettings, setGameSettings] = useState({
     maxPlayers: -1,
     time: 30,
-    gameCode: '',
+    gameCode: "",
     file: null,
   });
-
-  const socket = useRef(null);
-
-  useEffect(() => {
-    // Use the actual IP address of the server
-    socket.current = io('http://192.168.1.180:5050'); // Replace with your server's actual IP address
-
-    socket.current.on('connect', () => {
-      console.log('Connected to the server');
-
-      socket.current.on('client-create-game', (data) => {
-        console.log('Received create-game event:', data);
-      });
-
-      socket.current.on('player-join', (data) => {
-        console.log('Player joined:', data);
-        setTotalPlayers((prevPlayers) => [...prevPlayers, data.player]);
-        setPlayers((prevPlayers) => prevPlayers + 1);
-      });
-
-      socket.current.on('player-left', (data) => {
-        setTotalPlayers((prevPlayers) =>
-          prevPlayers.filter((player) => player.id !== data.id)
-        );
-        setPlayers((prevPlayers) => prevPlayers - 1);
-      });
-
-      // Example button to join game
-    });
-
-    // Clean up the socket connection when the component unmounts
-    return () => {
-      socket.current.disconnect();
-    };
-  }, []);
 
   const generateGameCode = () => {
     const code = generateGameId();
@@ -71,42 +33,43 @@ export const CreateNewGame = ({ updateStep }) => {
   };
 
   const handleCreateGame = async () => {
+    if (!gameSettings.file) {
+      alert("Please upload a file.");
+      return;
+    }
+
     const formData = new FormData();
-    formData.append('file', gameSettings.file);
+    formData.append("file", gameSettings.file);
 
     try {
-      const response = await axios.post('http://localhost:5050/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await axios.post(
+        "http://192.168.1.180:5050/upload",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
       if (response.data.success) {
-        // Set creator id
-        const playerid = generateUniqueId();
         const newGameSettings = {
           ...gameSettings,
-          creator: playerid,
           questions: response.data.data.game,
         };
         setGameSettings(newGameSettings);
 
-        // Save game settings to local storage
-        localStorage.setItem('gameSettings', JSON.stringify(newGameSettings));
+        console.log("socket: ", socket.current);
+        socket.current.emit("create-game", newGameSettings);
 
-        // Update step to waiting for players
+        //  Update the step to the next screen
         updateStep(1);
-
-        // Emit game settings to server
-        console.log('Emitting create-game event');
-        socket.current.emit('create-game', newGameSettings);
-
       } else {
         alert(response.data.message);
       }
     } catch (error) {
-      console.error('Error uploading file:', error);
-      alert('Error uploading file.');
+      console.error("Error uploading file:", error);
+      alert("Error uploading file.");
     }
   };
 
@@ -116,7 +79,7 @@ export const CreateNewGame = ({ updateStep }) => {
 
   return (
     <>
-      <div className="container w-1/2 bg-black/50 p-2 shadow-lg">
+      <div className="container md:w-1/2 bg-black/50 p-2 shadow-lg">
         <h1 className="text-center bg-white/20 rounded-md p-2 text-white tracking-wide uppercase text-md">
           Create Game
         </h1>
@@ -156,9 +119,12 @@ export const CreateNewGame = ({ updateStep }) => {
             <div className="maxPlayers my-2 p-2 flex flex-col justify-between border-[1px] border-gray-400 rounded-md">
               <div className="totalPlayers">
                 <div className="unlimitedPlayers h-10 flex justify-between text-white uppercase items-center bg-white/20 my-2 px-2 rounded-md">
-                  <label htmlFor="unlimited">
-                    Unlimited
-                    <span className="text-xs mx-2 px-2 bg-white/20 rounded-lg">
+                  <label
+                    htmlFor="unlimited"
+                    className="flex flex-col md:flex-row md:items-center"
+                  >
+                    <span>Unlimited</span>
+                    <span className="text-xs mb-1 md:m-0 md:mx-1 md:px-2 text-center bg-white/20 rounded-lg">
                       by default
                     </span>
                   </label>
@@ -222,9 +188,12 @@ export const CreateNewGame = ({ updateStep }) => {
             <div className="time my-2 p-2 flex flex-col justify-between border-[1px] border-gray-400 rounded-md">
               <div className="totalTime">
                 <div className="30seconds h-10 flex justify-between text-white uppercase items-center bg-white/20 my-2 px-2 rounded-md">
-                  <label htmlFor="30seconds">
-                    30 Sec
-                    <span className="text-xs mx-2 px-2 bg-white/20 rounded-lg">
+                  <label
+                    htmlFor="30seconds"
+                    className="flex flex-col md:flex-row md:items-center"
+                  >
+                    <span>Unlimited</span>
+                    <span className="text-xs mb-1 md:m-0 md:mx-1 md:px-2 text-center bg-white/20 rounded-lg">
                       by default
                     </span>
                   </label>
@@ -298,7 +267,7 @@ export const CreateNewGame = ({ updateStep }) => {
             />
 
             <button
-              className="min-w-max flex items-center gap-2 p-2 rounded-lg bg-white/20 text-white "
+              className="text-xs md:min-w-max flex items-center gap-2 p-2 rounded-lg bg-white/20 text-white "
               onClick={handleCodeSnippet}
             >
               Code Snippet

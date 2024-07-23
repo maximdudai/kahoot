@@ -1,40 +1,31 @@
 import { useState, useEffect, useRef } from "react";
 
-import { io } from "socket.io-client";
-
-export const WaitingPlayers = ({ updateStep }) => {
+export const WaitingPlayers = ({ socket, updateStep }) => {
   const [players, setPlayers] = useState(0);
   const [totalPlayers, setTotalPlayers] = useState([]);
-  const socket = useRef(null);
 
   useEffect(() => {
-    // Use the server's IP address
-    socket.current = io('http://192.168.1.180:5050'); // Replace with your server's IP address
 
-    const handlePlayerJoin = ({ gameId, player }) => {
-      console.log(`Player joined: ${player.username} in game: ${gameId}`);
-      setTotalPlayers((prevPlayers) => [...prevPlayers, player]);
-      setPlayers((prevPlayers) => prevPlayers + 1);
+    const handleJoinGame = (player) => {
+      console.log("Player joined: ", player);
+      setPlayers((players) => players + 1);
+      setTotalPlayers((players) => [...players, player]);
     };
 
     const handlePlayerLeft = (playerData) => {
-      setTotalPlayers((prevPlayers) =>
-        prevPlayers.filter((player) => player.id !== playerData.id)
-      );
-      setPlayers((prevPlayers) => prevPlayers - 1);
+      setPlayers((players) => players - 1);
+      setTotalPlayers((players) => players.filter((player) => player !== playerData));
     };
 
-    socket.current.on('player-join', handlePlayerJoin);
-    socket.current.on('player-left', handlePlayerLeft);
+    socket.current.on("player-join", handleJoinGame);
+    socket.current.on("player-left", handlePlayerLeft);
 
-    // Clean up the socket connection when the component unmounts
     return () => {
-      socket.current.off('player-join', handlePlayerJoin);
-      socket.current.off('player-left', handlePlayerLeft);
-      socket.current.disconnect();
+      socket.current.off("player-join", handleJoinGame);
+      socket.current.off("player-left", handlePlayerLeft);
     };
-  }, []);
 
+  }, []);
 
   const handleCancelGame = () => {
     socket.current.emit("cancel-game");
@@ -59,10 +50,10 @@ export const WaitingPlayers = ({ updateStep }) => {
           )}
         </div>
         {players >= 1 && (
-          <div className="playersList w-1/3">
+          <div className="playersList w-full md:w-1/3">
             <ul className="text-white w-full max-h-80 overflow-y-auto">
               {totalPlayers.map((player, index) => (
-                <li className="border-b-2 border-gray-300/20 p-2 mr-1 bg-black/20" key={index}>{player.username}</li>
+                <li className="border-b-2 border-gray-300/20 p-2 mr-1 bg-black/20" key={index}>{player}</li>
               ))}
             </ul>
           </div>

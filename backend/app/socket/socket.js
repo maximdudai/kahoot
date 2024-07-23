@@ -1,18 +1,16 @@
-let games = {};
-let totalGames = 0;
+let games = [];
 
 module.exports = (io) => {
   io.on('connection', (socket) => {
     console.log('A user connected');
 
     socket.on('create-game', (gameSettings) => {
-      console.log('Received create-game event');
-      createGame(io, gameSettings, socket);
+      console.log('game created');
+      createGame(gameSettings, socket);
     });
 
     socket.on('join-game', (data) => {
-      console.log('Received join-game event');
-      joinGame(io, data, socket);
+      joinGame(io, socket, data);
     });
 
     socket.on('disconnect', () => {
@@ -21,45 +19,49 @@ module.exports = (io) => {
   });
 };
 
-function createGame(io, gameSettings, socket) {
-  totalGames++;
-  const gameId = totalGames;
+function createGame(gameSettings, socket) {
 
-  games[gameId] = {
-    gameSettings: gameSettings,
+  const game = {
+    gameSettings,
+    gameid: socket.id,
     players: [],
   };
+  games.push(game);
 
-  console.log(`Creating game with ID: ${gameId} and Code: ${gameSettings.gameCode}`);
-  socket.join(gameId.toString());
-
-  // Emit event to the room after joining
-  io.to(gameId.toString()).emit('create-game', { gameId, gameSettings });
-  console.log(`Game created with ID: ${gameId} and Code: ${gameSettings.gameCode}`);
+  socket.join(game.gameid.toString());
 }
 
-function joinGame(io, data, socket) {
-  const { gameCode, player } = data;
-  const gameId = findGameByCode(gameCode);
+function joinGame(io, socket, data) {
+  try {
+    const { gameCode, player } = data;
+    const { username } = player;
 
-  console.log(`Player ${player.username} trying to join game with code: ${gameCode}`);
+    const gameId = findGameByCode(gameCode);
 
-  if (gameId !== null) {
-    games[gameId].players.push(player);
+    // TODO: return an error if the game ID is not found
+    if (!gameId)
+      return;
+
     socket.join(gameId.toString());
-    io.to(gameId.toString()).emit('player-join', { gameId, player });
-    console.log(`Player joined game with ID: ${gameId}`);
-  } else {
-    socket.emit('error', `Game with code: ${gameCode} not found`);
-    console.error(`Game with code: ${gameCode} not found`);
+    io.to(gameId.toString()).emit('player-join', username);
+
+  } catch (error) {
+    console.error(error);
   }
 }
+
 
 function findGameByCode(code) {
-  for (let gameId in games) {
-    if (games[gameId].gameSettings.gameCode === code) {
-      return gameId;
+  try {
+    const game = games?.find((game) => game.gameSettings.gameCode === code);
+
+    if (!game) {
+      console.log(`Game with code ${code} not found`);
+      return null;
     }
+
+    return game.gameid;
+  } catch (error) {
+    console.error(error);
   }
-  return null;
 }
