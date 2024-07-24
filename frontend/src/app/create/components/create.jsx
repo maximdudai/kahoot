@@ -25,6 +25,19 @@ export const CreateNewGame = ({ socket, updateStep }) => {
     setGameSettings({ ...gameSettings, gameCode: code });
   };
 
+  const handleCopyGameCode = async () => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(gameCode);
+        console.log("Game code copied to clipboard");
+      } else {
+        throw new Error("Clipboard API not supported");
+      }
+    } catch (error) {
+      console.error("Error copying game code:", error);
+    }
+  };
+
   const handleFileChange = (e) => {
     setGameSettings((prevSettings) => ({
       ...prevSettings,
@@ -99,10 +112,10 @@ export const CreateNewGame = ({ socket, updateStep }) => {
           >
             Generate Code
           </button>
-          {gameCode && (
+          {gameCode !== "" && (
             <button
               className="text-white w-12 h-10 ml-2 p-2 bg-white/20 rounded-lg"
-              onClick={() => navigator?.clipboard?.writeText(gameCode)}
+              onClick={handleCopyGameCode}
             >
               <FaRegCopy className="m-auto" />
             </button>
