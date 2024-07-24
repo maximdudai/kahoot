@@ -15,6 +15,10 @@ module.exports = (io) => {
       joinGame(io, socket, data);
     });
 
+    socket.on('cancel-game', () => {
+      cancelGame(io, socket.id);
+    });
+
     socket.on('disconnect', () => {
       EmitEventOnDisconnect(io, socket);
     });
@@ -30,7 +34,15 @@ function createGame(gameSettings, socket) {
   };
   games.push(game);
 
+  // push the creator to the game
+  const creator = new Player(socket.id, game.gameid, true);
+  game.players.push(creator);
+
+  // create a room for the game
   socket.join(game.gameid.toString());
+
+  // Emit the create-game event to the creator
+  socket.emit('game-created', game);
 }
 
 function joinGame(io, socket, data) {
@@ -49,9 +61,8 @@ function joinGame(io, socket, data) {
     socket.join(gameData.gameid.toString());
 
     // Add the player to the game
-    const newPlayer = new Player(username, socket.id, gameData.gameid);
+    const newPlayer = new Player(socket.id, gameData.gameid, false);
     gameData.players.push(newPlayer);
-
 
     // Emit the player-join event to creator 
     io.to(gameData.gameid.toString()).emit('player-join', username);

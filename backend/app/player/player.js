@@ -1,6 +1,5 @@
 class Player {
-  constructor(name, socket, gameid, creator = false) {
-    this.name = name;
+  constructor(socket, gameid, creator = false) {
     this.socket = socket;
     this.gameid = gameid;
     this.isCreator = creator

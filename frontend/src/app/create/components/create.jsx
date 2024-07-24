@@ -12,11 +12,11 @@ export const CreateNewGame = ({ socket, updateStep }) => {
   const [gameCode, setGameCode] = useState("");
   const [showCodeSnippet, setShowCodeSnippet] = useState(false);
   const snippetRef = useRef(null);
+  const [gameFile, setGameFile] = useState(null);
   const [gameSettings, setGameSettings] = useState({
     maxPlayers: -1,
     time: 30,
     gameCode: "",
-    file: null,
   });
 
   const generateGameCode = () => {
@@ -39,20 +39,17 @@ export const CreateNewGame = ({ socket, updateStep }) => {
   };
 
   const handleFileChange = (e) => {
-    setGameSettings((prevSettings) => ({
-      ...prevSettings,
-      file: e.target.files[0],
-    }));
+    setGameFile(e.target.files[0]);
   };
 
   const handleCreateGame = async () => {
-    if (!gameSettings.file) {
+    if (!gameFile) {
       alert("Please upload a file.");
       return;
     }
 
     const formData = new FormData();
-    formData.append("file", gameSettings.file);
+    formData.append("file", gameFile);
 
     try {
       const response = await axios.post(
@@ -84,6 +81,7 @@ export const CreateNewGame = ({ socket, updateStep }) => {
       alert("Error uploading file.");
     }
   };
+
 
   const handleCodeSnippet = () => {
     setShowCodeSnippet(!showCodeSnippet);

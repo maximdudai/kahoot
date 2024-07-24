@@ -7,7 +7,6 @@ export const WaitingPlayers = ({ socket, updateStep }) => {
   useEffect(() => {
 
     const handleJoinGame = (player) => {
-      console.log("Player joined: ", player);
       setPlayers((players) => players + 1);
       setTotalPlayers((players) => [...players, player]);
     };
