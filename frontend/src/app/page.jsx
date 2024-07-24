@@ -22,6 +22,19 @@ export default function Home() {
     };
   }, []);
 
+  useEffect(() => {
+
+    const handleGameError = () => {
+      alert('Game not found.');
+    }
+
+    socket.current.on("game-not-found", handleGameError);
+
+    return () => {
+      socket.current.off("game-not-found", handleGameError);
+    }
+  }, []);
+
   const handleJoinGame = () => {
     if (username === "" || gameCode === "") {
       alert("Please fill in all fields.");

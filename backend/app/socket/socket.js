@@ -39,8 +39,10 @@ function joinGame(io, socket, data) {
     const gameId = findGameByCode(gameCode);
 
     // TODO: return an error if the game ID is not found
-    if (!gameId)
+    if (!gameId) {
+      socket.emit('game-not-found');
       return;
+    }
 
     socket.join(gameId.toString());
     io.to(gameId.toString()).emit('player-join', username);
@@ -56,7 +58,6 @@ function findGameByCode(code) {
     const game = games?.find((game) => game.gameSettings.gameCode === code);
 
     if (!game) {
-      console.log(`Game with code ${code} not found`);
       return null;
     }
 

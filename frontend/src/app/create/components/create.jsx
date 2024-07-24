@@ -59,7 +59,6 @@ export const CreateNewGame = ({ socket, updateStep }) => {
         };
         setGameSettings(newGameSettings);
 
-        console.log("socket: ", socket.current);
         socket.current.emit("create-game", newGameSettings);
 
         //  Update the step to the next screen
