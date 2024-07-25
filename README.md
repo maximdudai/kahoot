@@ -13,6 +13,11 @@ This project is an interactive quiz game inspired by the classic Kahoot! experie
   - Kicking a player out of the game
 - **Feedback:** At the end of the game, all users receive feedback on their performance, including their scores and the correct answers.
 
+## Tech Stack
+- Frontend: NextJS
+- Backend: ExpressJS
+- Real-time interaction: SocketIO
+
 ## JSON File Format
 
 To create a game, users need to upload a JSON file in the following format:
