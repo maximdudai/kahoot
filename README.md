@@ -24,7 +24,7 @@ To create a game, users need to upload a JSON file in the following format:
 
 ```json
 {
-  "questions": [
+  "game": [
     {
       "question": "What is the purpose of LINQ in C#?",
       "options": [
