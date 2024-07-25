@@ -137,3 +137,19 @@ function findGameByCode(code) {
     console.error(error);
   }
 }
+
+function findPlayerBySocketId(socketId) {
+  try {
+    for (const game of games) {
+      const player = game.players.find((player) => player.socket === socketId);
+
+      if (player) {
+        return player;
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.error(error);
+  }
+}
