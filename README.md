@@ -11,6 +11,7 @@ This project is an interactive quiz game inspired by the classic Kahoot! experie
   - Pausing the timer
   - Increasing the timer
   - Kicking a player out of the game
+  - Giving a hint by removing one random incorrect option
 - **Feedback:** At the end of the game, all users receive feedback on their performance, including their scores and the correct answers.
 
 ## Tech Stack
