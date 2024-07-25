@@ -19,6 +19,9 @@ This project is an interactive quiz game inspired by the classic Kahoot! experie
 - Backend: ExpressJS
 - Real-time interaction: SocketIO
 
+## Creating a JSON File
+- A recommended way to generate a correct JSON file is by using ChatGPT. Upload the required PDF to ChatGPT and request to make a JSON file with questions based on the content. Ensure the generated JSON file follows the format mentioned above.
+
 ## JSON File Format
 
 To create a game, users need to upload a JSON file in the following format:
