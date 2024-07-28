@@ -11,12 +11,16 @@ This project is an interactive quiz game inspired by the classic Kahoot! experie
   - Pausing the timer
   - Increasing the timer
   - Kicking a player out of the game
+  - Giving a hint by removing one random incorrect option
 - **Feedback:** At the end of the game, all users receive feedback on their performance, including their scores and the correct answers.
 
 ## Tech Stack
 - Frontend: NextJS
 - Backend: ExpressJS
 - Real-time interaction: SocketIO
+
+## Creating a JSON File
+- A recommended way to generate a correct JSON file is by using ChatGPT. Upload the required PDF to ChatGPT and request to make a JSON file with questions based on the content. Ensure the generated JSON file follows the format mentioned above.
 
 ## JSON File Format
 
