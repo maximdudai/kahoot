@@ -4,7 +4,17 @@ let games = [];
 
 module.exports = (io) => {
   io.on('connection', (socket) => {
+
+    // current time
+    let time = new Date().toLocaleTimeString();
+
+    // socket location
+    const socketLocation = socket.handshake.address;
+
+    console.log('Socket from ' + socketLocation + ' connected at ' + time);
+
     socket.on('create-game', (gameSettings) => {
+      console.log('gamecreated #' + games.length + 1);
       createGame(gameSettings, socket);
     });
 
@@ -12,11 +22,16 @@ module.exports = (io) => {
       joinGame(io, socket, data, callback);
     });
 
+    socket.on('leave-game', () => {
+      EmitEventOnDisconnect(io, socket);
+    });
+
     socket.on('cancel-game', () => {
       cancelGame(io, socket.id);
     });
 
     socket.on('disconnect', () => {
+      console.log('Socket from ' + socketLocation + ' disconnected at ' + time);
       EmitEventOnDisconnect(io, socket);
     });
   });
@@ -31,12 +46,8 @@ function createGame(gameSettings, socket) {
   };
   games.push(game);
 
-  // push the creator to the game
-  const creator = new Player(socket.id, game.gameid, true);
-  game.players.push(creator);
-
-  // create a room for the game
-  socket.join(game.gameid.toString());
+  // Add the player to the game
+  addPlayerToGame('creator', socket, game, true);
 
   // Emit the create-game event to the creator
   socket.emit('game-created', game);
@@ -53,15 +64,14 @@ function joinGame(io, socket, data, callback) {
       callback({ success: false });
       return;
     }
-
-    socket.join(gameData.gameid.toString());
-
     // Add the player to the game
-    const newPlayer = new Player(socket.id, gameData.gameid, false);
-    gameData.players.push(newPlayer);
+    addPlayerToGame(username, socket, gameData);
 
     // Emit the player-join event to creator 
-    io.to(gameData.gameid.toString()).emit('player-join', username);
+    io.to(gameData.gameid.toString()).emit('player-join', {
+      username,
+      socket: socket.id
+    });
 
     callback({ success: true });
 
@@ -72,27 +82,31 @@ function joinGame(io, socket, data, callback) {
 
 function EmitEventOnDisconnect(io, socket) {
   try {
-    
-    if(!games.length)
-        return;
+
+    if (!games.length)
+      return;
 
     for (const game of games) {
       const playerIndex = game.players.findIndex(
         (player) => player.socket === socket.id
       );
-  
+
       if (playerIndex === -1) {
         continue;
       }
-  
+
       const player = game.players[playerIndex];
-      game.players.splice(playerIndex, 1);
-  
+
       // Emit the player-leave event to all players in the game
-      io.to(game.gameid.toString()).emit('player-left', player.name);
-  
+      io.to(game.gameid.toString()).emit('player-left', {
+        username: player.username,
+        socket: player.socket
+      });
+
+      game.players.splice(playerIndex, 1);
+
       // Cancel the game if there are no players left
-      if (game.players.length === 0) {
+      if (game.players.length === 0 || player.isCreator) {
         cancelGame(io, game.gameid);
       }
     }
@@ -120,6 +134,13 @@ function cancelGame(io, gameid) {
   } catch (error) {
     console.error(error);
   }
+}
+
+function addPlayerToGame(username, socket, game, isCreator = false) {
+  const newPlayer = new Player(username, socket.id, game.gameid, isCreator);
+  game.players.push(newPlayer);
+
+  socket.join(game.gameid.toString());
 }
 
 function findGameByCode(code) {

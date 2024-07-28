@@ -1,5 +1,6 @@
 class Player {
-  constructor(socket, gameid, creator = false) {
+  constructor(username, socket, gameid, creator = false) {
+    this.username = username
     this.socket = socket;
     this.gameid = gameid;
     this.isCreator = creator
@@ -18,8 +19,8 @@ class Player {
     return this.gameid;
   }
 
-  getName() {
-    return this.name;
+  getUsername() {
+    return this.username;
   }
 
   getScore() {

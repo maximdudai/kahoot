@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useContext } from "react";
 
 import axios from "axios";
 
@@ -7,8 +7,10 @@ import { TbJson } from "react-icons/tb";
 import { Codesnippet } from "@/app/components/codesnippet";
 
 import { generateGameId } from "@/app/utils/gameid";
+import { SocketContext } from "@/app/context/socket";
+import { useEffect } from "react";
 
-export const CreateNewGame = ({ socket, updateStep }) => {
+export const CreateNewGame = ({updateStep }) => {
   const [gameCode, setGameCode] = useState("");
   const [showCodeSnippet, setShowCodeSnippet] = useState(false);
   const snippetRef = useRef(null);
@@ -18,6 +20,7 @@ export const CreateNewGame = ({ socket, updateStep }) => {
     time: 30,
     gameCode: "",
   });
+  const socket = useContext(SocketContext);
 
   const generateGameCode = () => {
     const code = generateGameId();
@@ -69,7 +72,7 @@ export const CreateNewGame = ({ socket, updateStep }) => {
         };
         setGameSettings(newGameSettings);
 
-        socket.current.emit("create-game", newGameSettings);
+        socket.emit("create-game", newGameSettings);
 
         //  Update the step to the next screen
         updateStep(1);
@@ -202,7 +205,7 @@ export const CreateNewGame = ({ socket, updateStep }) => {
                     htmlFor="30seconds"
                     className="flex flex-col md:flex-row md:items-center"
                   >
-                    <span>Unlimited</span>
+                    <span>30 seconds</span>
                     <span className="text-xs mb-1 md:m-0 md:mx-1 md:px-2 text-center bg-white/20 rounded-lg">
                       by default
                     </span>

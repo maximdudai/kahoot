@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { MdOutlineTimer } from "react-icons/md";
+import { LeaveGame } from "../components/leavegame";
 
 export default function PlayerScreen() {
   const [timer, setTimer] = useState(30);
@@ -88,11 +89,7 @@ export default function PlayerScreen() {
         </div>
       </div>
 
-      <div className="exitGame mt-1 text-center">
-        <button className="bg-red-500/30 text-white text-xs uppercase p-2 shadow-md hover:bg-red-500">
-          Exit Game
-        </button>
-      </div>
+      <LeaveGame />
     </div>
   );
 }

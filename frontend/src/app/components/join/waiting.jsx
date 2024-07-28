@@ -1,3 +1,5 @@
+import { LeaveGame } from "../leavegame";
+
 export const WaitingGameStart = () => {
   return (
     <div className="waitingGame">
@@ -6,6 +8,8 @@ export const WaitingGameStart = () => {
           Waiting for game to start...
         </h1>
       </div>
+
+      <LeaveGame />
     </div>
   )
 };

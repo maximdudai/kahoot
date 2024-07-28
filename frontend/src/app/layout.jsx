@@ -3,6 +3,7 @@ import "./globals.css";
 
 import { FaGithub } from "react-icons/fa";
 import Link from "next/link";
+import { SocketProvider } from "./context/socket";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -14,16 +15,22 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body>
         <div className="bgImage">
           <div className="bgEffect"></div>
         </div>
-        <main className="w-screen min-h-screen flex items-center justify-center p-2">
-          {children}
-        </main>
+        <SocketProvider>
+          <main className="w-screen min-h-screen flex items-center justify-center p-2">
+            {children}
+          </main>
+        </SocketProvider>
 
         <footer className="absolute bottom-2 right-2">
-          <Link target="_blank" href="https://github.com/maximdudai/kahoot" className="text-white">
+          <Link
+            target="_blank"
+            href="https://github.com/maximdudai/kahoot"
+            className="text-white"
+          >
             <FaGithub className="w-10 h-10" />
           </Link>
         </footer>

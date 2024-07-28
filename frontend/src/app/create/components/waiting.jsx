@@ -1,33 +1,42 @@
-import { useState, useEffect } from "react";
+import { SocketContext } from "@/app/context/socket";
+import { useState, useEffect, useContext } from "react";
 
-export const WaitingPlayers = ({ socket, updateStep }) => {
+export const WaitingPlayers = ({updateStep }) => {
   const [players, setPlayers] = useState(0);
   const [totalPlayers, setTotalPlayers] = useState([]);
 
-  useEffect(() => {
+  let socket = useContext(SocketContext);
 
+  useEffect(() => {
     const handleJoinGame = (player) => {
       setPlayers((players) => players + 1);
-      setTotalPlayers((players) => [...players, player]);
+      setTotalPlayers((totalPlayers) => [...totalPlayers, player]);
     };
 
     const handlePlayerLeft = (playerData) => {
+
+      console.log(playerData);
+      
       setPlayers((players) => players - 1);
-      setTotalPlayers((players) => players.filter((player) => player !== playerData));
+      setTotalPlayers((totalPlayers) =>
+        totalPlayers.filter((player) => player.socket !== playerData.socket)
+      );
     };
 
-    socket.current.on("player-join", handleJoinGame);
-    socket.current.on("player-left", handlePlayerLeft);
+    if (socket) {
+      socket.on('player-join', handleJoinGame);
+      socket.on('player-left', handlePlayerLeft);
 
-    return () => {
-      socket.current.off("player-join", handleJoinGame);
-      socket.current.off("player-left", handlePlayerLeft);
-    };
-
-  }, []);
+      // Clean up the event listeners when the component unmounts or socket changes
+      return () => {
+        socket.off('player-join', handleJoinGame);
+        socket.off('player-left', handlePlayerLeft);
+      };
+    }
+  }, [socket, totalPlayers]);
 
   const handleCancelGame = () => {
-    socket.current.emit("cancel-game");
+    socket.emit("cancel-game");
     updateStep(0);
   };
 
@@ -52,7 +61,7 @@ export const WaitingPlayers = ({ socket, updateStep }) => {
           <div className="playersList w-full md:w-1/3">
             <ul className="text-white w-full max-h-80 overflow-y-auto">
               {totalPlayers.map((player, index) => (
-                <li className="border-b-2 border-gray-300/20 p-2 mr-1 bg-black/20" key={index}>{player}</li>
+                <li className="border-b-2 border-gray-300/20 p-2 mr-1 bg-black/20" key={index}>{player.username}</li>
               ))}
             </ul>
           </div>
