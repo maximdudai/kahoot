@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 export const WaitingPlayers = ({ socket, updateStep }) => {
   const [players, setPlayers] = useState(0);

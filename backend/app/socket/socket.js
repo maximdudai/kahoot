@@ -4,15 +4,12 @@ let games = [];
 
 module.exports = (io) => {
   io.on('connection', (socket) => {
-    console.log('A user connected');
-
     socket.on('create-game', (gameSettings) => {
-      console.log('game created');
       createGame(gameSettings, socket);
     });
 
-    socket.on('join-game', (data) => {
-      joinGame(io, socket, data);
+    socket.on('join-game', (data, callback) => {
+      joinGame(io, socket, data, callback);
     });
 
     socket.on('cancel-game', () => {
@@ -45,16 +42,15 @@ function createGame(gameSettings, socket) {
   socket.emit('game-created', game);
 }
 
-function joinGame(io, socket, data) {
+function joinGame(io, socket, data, callback) {
   try {
-    const { gameCode, player } = data;
-    const { username } = player;
+    const { gameCode, username } = data;
 
     const gameData = findGameByCode(gameCode);
 
     // TODO: return an error if the game ID is not found
-    if (!gameData.gameid) {
-      socket.emit('game-not-found');
+    if (!gameData?.gameid) {
+      callback({ success: false });
       return;
     }
 
@@ -66,6 +62,8 @@ function joinGame(io, socket, data) {
 
     // Emit the player-join event to creator 
     io.to(gameData.gameid.toString()).emit('player-join', username);
+
+    callback({ success: true });
 
   } catch (error) {
     console.error(error);

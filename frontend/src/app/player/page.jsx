@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 import { MdOutlineTimer } from "react-icons/md";
 
@@ -11,7 +11,6 @@ export default function PlayerScreen() {
   const handleQuestionResponse = (id) => {
     setResponse(id);
   };
-
 
   return (
     <div className="container">
@@ -39,7 +38,9 @@ export default function PlayerScreen() {
                 id="1"
                 onClick={() => handleQuestionResponse(1)}
                 className={`cursor-pointer w-full min-h-20 flex items-center border-2 border-gray-800 rounded-md shadow-md text-lg p-2 ${
-                  response === 1 ? "bg-green-500" : "bg-blue-600 hover:bg-blue-400"
+                  response === 1
+                    ? "bg-green-500"
+                    : "bg-blue-600 hover:bg-blue-400"
                 }`}
                 disabled={timer <= 0}
               >
@@ -49,7 +50,9 @@ export default function PlayerScreen() {
                 id="2"
                 onClick={() => handleQuestionResponse(2)}
                 className={`cursor-pointer w-full min-h-20 flex items-center border-2 border-gray-800 rounded-md shadow-md text-lg p-2 ${
-                  response === 2 ? "bg-green-500" : "bg-blue-600 hover:bg-blue-400"
+                  response === 2
+                    ? "bg-green-500"
+                    : "bg-blue-600 hover:bg-blue-400"
                 }`}
                 disabled={timer <= 0}
               >
@@ -60,7 +63,9 @@ export default function PlayerScreen() {
                 id="3"
                 onClick={() => handleQuestionResponse(3)}
                 className={`cursor-pointer w-full min-h-20 flex items-center border-2 border-gray-800 rounded-md shadow-md text-lg p-2 ${
-                  response === 3 ? "bg-green-500" : "bg-blue-600 hover:bg-blue-400"
+                  response === 3
+                    ? "bg-green-500"
+                    : "bg-blue-600 hover:bg-blue-400"
                 }`}
                 disabled={timer <= 0}
               >
@@ -70,7 +75,9 @@ export default function PlayerScreen() {
                 id="4"
                 onClick={() => handleQuestionResponse(4)}
                 className={`cursor-pointer w-full min-h-20 flex items-center border-2 border-gray-800 rounded-md shadow-md text-lg p-2 ${
-                  response === 4 ? "bg-green-500" : "bg-blue-600 hover:bg-blue-400"
+                  response === 4
+                    ? "bg-green-500"
+                    : "bg-blue-600 hover:bg-blue-400"
                 }`}
                 disabled={timer <= 0}
               >
