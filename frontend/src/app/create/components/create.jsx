@@ -72,7 +72,9 @@ export const CreateNewGame = ({updateStep }) => {
         };
         setGameSettings(newGameSettings);
 
-        socket.emit("create-game", newGameSettings);
+        socket.emit("create-game", (newGameSettings), (response) => {
+          sessionStorage.setItem("gameData", JSON.stringify(response?.gameData));
+        });
 
         //  Update the step to the next screen
         updateStep(1);
@@ -134,10 +136,10 @@ export const CreateNewGame = ({updateStep }) => {
                 <div className="unlimitedPlayers h-10 flex justify-between text-white uppercase items-center bg-white/20 my-2 px-2 rounded-md">
                   <label
                     htmlFor="unlimited"
-                    className="flex flex-col md:flex-row md:items-center"
+                    className="flex flex-col lg:flex-row lg:items-center"
                   >
                     <span>Unlimited</span>
-                    <span className="text-xs mb-1 md:m-0 md:mx-1 md:px-2 text-center bg-white/20 rounded-lg">
+                    <span className="text-xs mb-1 lg:m-0 lg:mx-1 lg:px-2 text-center bg-white/20 rounded-lg">
                       by default
                     </span>
                   </label>
@@ -203,10 +205,10 @@ export const CreateNewGame = ({updateStep }) => {
                 <div className="30seconds h-10 flex justify-between text-white uppercase items-center bg-white/20 my-2 px-2 rounded-md">
                   <label
                     htmlFor="30seconds"
-                    className="flex flex-col md:flex-row md:items-center"
+                    className="flex flex-col lg:flex-row lg:items-center"
                   >
                     <span>30 seconds</span>
-                    <span className="text-xs mb-1 md:m-0 md:mx-1 md:px-2 text-center bg-white/20 rounded-lg">
+                    <span className="text-xs mb-1 lg:m-0 lg:mx-1 lg:px-2 text-center bg-white/20 rounded-lg">
                       by default
                     </span>
                   </label>

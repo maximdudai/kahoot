@@ -13,9 +13,9 @@ module.exports = (io) => {
 
     console.log('Socket from ' + socketLocation + ' connected at ' + time);
 
-    socket.on('create-game', (gameSettings) => {
+    socket.on('create-game', (gameSettings, callback) => {
       console.log('gamecreated #' + games.length + 1);
-      createGame(gameSettings, socket);
+      createGame(gameSettings, socket, callback);
     });
 
     socket.on('join-game', (data, callback) => {
@@ -37,20 +37,21 @@ module.exports = (io) => {
   });
 };
 
-function createGame(gameSettings, socket) {
+function createGame(gameSettings, socket, callback) {
 
   const game = {
     gameSettings,
     gameid: socket.id,
+    creator: socket.id,
     players: [],
   };
   games.push(game);
 
   // Add the player to the game
-  addPlayerToGame('creator', socket, game, true);
+  addPlayerToGame('creator', socket, game);
 
   // Emit the create-game event to the creator
-  socket.emit('game-created', game);
+  callback({ gameData: game });
 }
 
 function joinGame(io, socket, data, callback) {
@@ -73,7 +74,13 @@ function joinGame(io, socket, data, callback) {
       socket: socket.id
     });
 
-    callback({ success: true });
+
+    //send gameData object without players and questions
+    const newGameData = { ...gameData };
+    delete newGameData.players;
+    delete newGameData.gameSettings.questions;
+
+    callback({ gameData: newGameData });
 
   } catch (error) {
     console.error(error);
@@ -136,8 +143,8 @@ function cancelGame(io, gameid) {
   }
 }
 
-function addPlayerToGame(username, socket, game, isCreator = false) {
-  const newPlayer = new Player(username, socket.id, game.gameid, isCreator);
+function addPlayerToGame(username, socket, game) {
+  const newPlayer = new Player(username, socket.id, game.gameid);
   game.players.push(newPlayer);
 
   socket.join(game.gameid.toString());
@@ -152,22 +159,6 @@ function findGameByCode(code) {
     }
 
     return game;
-  } catch (error) {
-    console.error(error);
-  }
-}
-
-function findPlayerBySocketId(socketId) {
-  try {
-    for (const game of games) {
-      const player = game.players.find((player) => player.socket === socketId);
-
-      if (player) {
-        return player;
-      }
-    }
-
-    return null;
   } catch (error) {
     console.error(error);
   }

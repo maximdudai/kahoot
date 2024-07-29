@@ -1,3 +1,4 @@
+import { Playerlist } from "@/app/components/playerlist";
 import { SocketContext } from "@/app/context/socket";
 import { useState, useEffect, useContext } from "react";
 
@@ -14,9 +15,6 @@ export const WaitingPlayers = ({updateStep }) => {
     };
 
     const handlePlayerLeft = (playerData) => {
-
-      console.log(playerData);
-      
       setPlayers((players) => players - 1);
       setTotalPlayers((totalPlayers) =>
         totalPlayers.filter((player) => player.socket !== playerData.socket)
@@ -59,11 +57,7 @@ export const WaitingPlayers = ({updateStep }) => {
         </div>
         {players >= 1 && (
           <div className="playersList w-full md:w-1/3">
-            <ul className="text-white w-full max-h-80 overflow-y-auto">
-              {totalPlayers.map((player, index) => (
-                <li className="border-b-2 border-gray-300/20 p-2 mr-1 bg-black/20" key={index}>{player.username}</li>
-              ))}
-            </ul>
+            <Playerlist players={totalPlayers} />
           </div>
         )}
         <div className="flex flex-col my-3 gap-2 w-1/3 items-center">
