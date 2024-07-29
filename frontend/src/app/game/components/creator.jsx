@@ -60,7 +60,7 @@ export const CreatorScreen = () => {
       </div>
 
       <div className="gameQuestion">
-        <QuestionAnswer question={'Is c# a good language?'} options={options} />
+        <QuestionAnswer question={'Is c# a good language?'} options={options} disabled />
       </div>
     </div>
   )

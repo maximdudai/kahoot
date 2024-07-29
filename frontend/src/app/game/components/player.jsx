@@ -14,12 +14,19 @@ export const PlayerScreen = () => {
     setResponse(id);
   };
 
+  const options = [
+    'Yes',
+    'No',
+    'Maybe',
+    'I dont know'
+  ];
+
   return (
     <div className="container">
       <div className="bg-white/30 text-white rounded-md">
         <Timer seconds={timer} />
 
-        <QuestionAnswer />
+        <QuestionAnswer question={'Is c# a good language?'} options={options} />
       </div>
 
       <LeaveGame />

@@ -1,7 +1,14 @@
 import { useState } from "react";
+import { twMerge } from "tailwind-merge";
 
-export const QuestionAnswer = ({ question, options }) => {
+export const QuestionAnswer = ({ question, options, disabled }) => {
   const [response, setResponse] = useState(null);
+
+  const handleResponse = (id) => {
+    if (!disabled) {
+      setResponse(id);
+    }
+  };
   
   return (
     <div className="questionData mt-10 w-full flex justify-center items-center flex-col">
@@ -15,9 +22,10 @@ export const QuestionAnswer = ({ question, options }) => {
             <li
               key={index}
               id={index}
-              onClick={() => setResponse(index)}
+              onClick={() => handleResponse(index)}
               className={`cursor-pointer w-full min-h-20 flex items-center border-2 border-gray-800 rounded-md shadow-md text-lg p-2 ${
-                response === index
+                disabled ? 'bg-white/40 cursor-default' : 
+                response === index && !disabled
                   ? "bg-green-500"
                   : "bg-blue-600 hover:bg-blue-400"
               }`}
