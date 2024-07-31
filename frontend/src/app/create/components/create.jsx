@@ -73,7 +73,7 @@ export const CreateNewGame = ({updateStep }) => {
         setGameSettings(newGameSettings);
 
         socket.emit("create-game", (newGameSettings), (response) => {
-          sessionStorage.setItem("gameData", JSON.stringify(response?.gameData));
+          localStorage.setItem("game", JSON.stringify(response?.gameData));
         });
 
         //  Update the step to the next screen

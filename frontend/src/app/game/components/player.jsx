@@ -1,35 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useContext } from "react";
 
 import { LeaveGame } from "@/app/components/leavegame";
 import { Timer } from "@/app/components/timer";
 import { QuestionAnswer } from "@/app/components/questionanswer";
+import { SocketContext } from "@/app/context/socket";
 
-export const PlayerScreen = () => {
-  const [timer, setTimer] = useState(30);
+export const PlayerScreen = ({ question, options }) => {
+  const [timer, setTimer] = useState();
   const [response, setResponse] = useState(null);
+  const socket = useContext(SocketContext);
 
   const handleQuestionResponse = (id) => {
     setResponse(id);
-  };
 
-  const options = [
-    'Yes',
-    'No',
-    'Maybe',
-    'I dont know'
-  ];
+    socket?.emit("question-response", {});
+  };
 
   return (
     <div className="container">
       <div className="bg-white/30 text-white rounded-md">
-        <Timer seconds={timer} />
+        <div className="timerCounter w-full flex justify-center p-2">
+          <Timer seconds={timer} />
+        </div>
 
-        <QuestionAnswer question={'Is c# a good language?'} options={options} />
+        <QuestionAnswer
+          question={question}
+          options={options}
+          onResponse={handleQuestionResponse}
+          disabled={timer}
+        />
       </div>
 
       <LeaveGame />
     </div>
   );
-}
+};

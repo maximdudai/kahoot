@@ -15,21 +15,6 @@ export default function Home() {
 
   const socket = useContext(SocketContext);
 
-  useEffect(() => {
-    
-    const cancelGame = () => {
-      alert("Game has been cancelled.");
-      
-      router.push("/");
-    }
-
-    socket?.on("cancel-game", cancelGame);
-
-    return () => {
-      socket?.off("cancel-game", cancelGame);
-    };
-  }, []);
-
   const handleJoinGame = () => {
     try {
       if (username === "" || gameCode === "") {
@@ -44,9 +29,9 @@ export default function Home() {
             return;
           }
   
-          sessionStorage.setItem('username', username);
-          sessionStorage.setItem('socket', socket.id);
-          sessionStorage.setItem('game', JSON.stringify(response?.gameData));
+          localStorage.setItem('username', username);
+          localStorage.setItem('socket', socket.id);
+          localStorage.setItem('game', JSON.stringify(response?.gameData));
   
           router.push('/join');
         });

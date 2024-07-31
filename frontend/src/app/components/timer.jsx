@@ -1,6 +1,7 @@
 import { MdOutlineTimer } from "react-icons/md";
 
 export const Timer = ({ seconds }) => {
+
   return (
     <div className="timerInformation shadow-lg shadow-black/30 border-l-[1px] border-r-[1px] border-gray-300/30 w-32 uppercase flex flex-col justify-center items-center">
       <div className="timeLeft w-full bg-white/30">

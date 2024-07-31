@@ -9,9 +9,9 @@ export const LeaveGame = () => {
   const socket = useContext(SocketContext);
 
   const handleLeaveGame = () => {
-    sessionStorage.removeItem("username");
-    sessionStorage.removeItem("socket");
-    sessionStorage.removeItem("game");
+    localStorage.removeItem("username");
+    localStorage.removeItem("socket");
+    localStorage.removeItem("game");
 
     socket?.emit("leave-game");
     router.push("/");

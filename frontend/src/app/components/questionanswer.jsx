@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { twMerge } from "tailwind-merge";
 
-export const QuestionAnswer = ({ question, options, disabled }) => {
+export const QuestionAnswer = ({ question, options, onResponse, disabled }) => {
   const [response, setResponse] = useState(null);
 
   const handleResponse = (id) => {
     if (!disabled) {
       setResponse(id);
+
+      onResponse(id);
     }
   };
   
@@ -25,7 +26,7 @@ export const QuestionAnswer = ({ question, options, disabled }) => {
               onClick={() => handleResponse(index)}
               className={`cursor-pointer w-full min-h-20 flex items-center border-2 border-gray-800 rounded-md shadow-md text-lg p-2 ${
                 disabled ? 'bg-white/40 cursor-default' : 
-                response === index && !disabled
+                response === index
                   ? "bg-green-500"
                   : "bg-blue-600 hover:bg-blue-400"
               }`}

@@ -11,6 +11,13 @@ export default function Join() {
 
   useEffect(() => {
 
+    const cancelGame = () => {
+      alert("Game has been cancelled.");
+      
+      router.push("/");
+    }
+    socket?.on("cancel-game", cancelGame);
+
     socket?.on('game-start', ({ }) => {
       
       router.push('/game');
@@ -18,6 +25,7 @@ export default function Join() {
 
     return () => {
       socket?.off('game-start');
+      socket?.off("cancel-game", cancelGame);
     }
   }, []);
 

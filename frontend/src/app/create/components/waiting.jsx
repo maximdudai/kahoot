@@ -2,7 +2,7 @@ import { Playerlist } from "@/app/components/playerlist";
 import { SocketContext } from "@/app/context/socket";
 import { useState, useEffect, useContext } from "react";
 
-export const WaitingPlayers = ({updateStep }) => {
+export const WaitingPlayers = ({ updateStep }) => {
   const [players, setPlayers] = useState(0);
   const [totalPlayers, setTotalPlayers] = useState([]);
 
@@ -22,21 +22,25 @@ export const WaitingPlayers = ({updateStep }) => {
     };
 
     if (socket) {
-      socket.on('player-join', handleJoinGame);
-      socket.on('player-left', handlePlayerLeft);
+      socket?.on('player-join', handleJoinGame);
+      socket?.on('player-left', handlePlayerLeft);
 
       // Clean up the event listeners when the component unmounts or socket changes
       return () => {
-        socket.off('player-join', handleJoinGame);
-        socket.off('player-left', handlePlayerLeft);
+        socket?.off('player-join', handleJoinGame);
+        socket?.off('player-left', handlePlayerLeft);
       };
     }
   }, [socket, totalPlayers]);
 
   const handleCancelGame = () => {
-    socket.emit("cancel-game");
+    socket?.emit("cancel-game");
     updateStep(0);
   };
+
+  const handleStartGame = () => {
+    socket?.emit("emit-question", (socket.id));
+  }
 
   return (
     <>
@@ -64,7 +68,7 @@ export const WaitingPlayers = ({updateStep }) => {
           {players >= 1 && (
             <button
               className="w-full shadow-lg bg-green-500 text-white px-4 py-2 rounded-md"
-              onClick={() => console.log("Start Game")}
+              onClick={handleStartGame}
             >
               Start Game
             </button>

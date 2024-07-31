@@ -30,6 +30,16 @@ module.exports = (io) => {
       cancelGame(io, socket.id);
     });
 
+    // game events
+    socket.on('emit-question', (gameid) => {
+      console.log('sv-side: emit-question');
+      emitNextQuestion(io, gameid);
+    });
+
+    socket.on('player-answer', (socket, data) => {
+      onPlayerAnswer(io, socket, data);
+    });
+
     socket.on('disconnect', () => {
       console.log('Socket from ' + socketLocation + ' disconnected at ' + time);
       EmitEventOnDisconnect(io, socket);
@@ -39,19 +49,25 @@ module.exports = (io) => {
 
 function createGame(gameSettings, socket, callback) {
 
-  const game = {
-    gameSettings,
-    gameid: socket.id,
-    creator: socket.id,
-    players: [],
-  };
-  games.push(game);
+  try {
+    const game = {
+      gameSettings,
+      gameid: socket.id,
+      creator: socket.id,
+      players: [],
+      currentQuestionIndex: 0,
+    };
+    games.push(game);
 
-  // Add the player to the game
-  addPlayerToGame('creator', socket, game);
+    // Add the player to the game
+    addPlayerToGame('creator', socket, game);
 
-  // Emit the create-game event to the creator
-  callback({ gameData: game });
+    // Emit the create-game event to the creator
+    callback({ gameData: game });
+  }
+  catch (error) {
+    console.error(error);
+  }
 }
 
 function joinGame(io, socket, data, callback) {
@@ -76,7 +92,7 @@ function joinGame(io, socket, data, callback) {
 
 
     //send gameData object without players and questions
-    const newGameData = { ...gameData };
+    const newGameData = JSON.parse(JSON.stringify(gameData));
     delete newGameData.players;
     delete newGameData.gameSettings.questions;
 
@@ -144,10 +160,16 @@ function cancelGame(io, gameid) {
 }
 
 function addPlayerToGame(username, socket, game) {
-  const newPlayer = new Player(username, socket.id, game.gameid);
-  game.players.push(newPlayer);
 
-  socket.join(game.gameid.toString());
+  try {
+    const newPlayer = new Player(username, socket.id, game.gameid);
+    game?.players.push(newPlayer);
+
+    socket.join(game.gameid.toString());
+  }
+  catch (error) {
+    console.error(error);
+  }
 }
 
 function findGameByCode(code) {
@@ -160,6 +182,90 @@ function findGameByCode(code) {
 
     return game;
   } catch (error) {
+    console.error(error);
+  }
+}
+
+function findGameById(id) {
+  try {
+    const game = games?.find((game) => game.gameid === id);
+
+    if (!game) {
+      console.log("Game not found");
+      return null;
+    }
+
+    return game;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+function findPlayerBySocketId(game, socketId) {
+  try {
+    const player = game.players.find((player) => player.socket === socketId);
+
+    if (!player) {
+      return null;
+    }
+
+    return player;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// game events
+function emitNextQuestion(io, gameid) {
+  try {
+    const game = findGameById(gameid);
+
+    if (!game)
+      return;
+
+    const gameSettingsCopy = JSON.parse(JSON.stringify(game?.gameSettings));
+    const currentQuestion = gameSettingsCopy.questions[game.currentQuestionIndex ?? 0];
+
+    // Emit the next-question event to all players in the game
+
+    console.log('currentQuestion: ', currentQuestion);
+    
+    io.to(game.gameid.toString()).emit('next-question', {
+      data: currentQuestion,
+    });
+
+
+    game.currentQuestionIndex++;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+
+
+function onPlayerAnswer(io, socket, data) {
+  try {
+    const { gameid, answer } = data;
+
+    const game = findGameById(gameid);
+
+    if (!game)
+      return;
+
+    const player = findPlayerBySocketId(game, socket.id);
+    const currentQuestion = game?.gameSettings.questions[game.currentQuestionIndex];
+
+    player?.answers.push({
+      question: currentQuestion.question,
+      answer
+    });
+
+    io.to(game.gameid.toString()).emit('player-answered', {
+      username: player.username,
+      socket: socket.id,
+    });
+  }
+  catch (error) {
     console.error(error);
   }
 }

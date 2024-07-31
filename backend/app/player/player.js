@@ -3,11 +3,16 @@ class Player {
     this.username = username
     this.socket = socket;
     this.gameid = gameid;
+    this.answers = [];
     this.score = 0;
   }
 
   increaseScore() {
     this.score++;
+  }
+
+  addAnswer(answer) {
+    this.answers.push(answer);
   }
 
   setGameId(gameid) {

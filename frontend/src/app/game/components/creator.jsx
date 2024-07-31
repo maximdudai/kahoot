@@ -1,47 +1,36 @@
+import { useState, useContext, useEffect } from 'react';
+
 import { Playerlist } from '@/app/components/playerlist';
 import { QuestionAnswer } from '@/app/components/questionanswer';
 import { Timer } from '@/app/components/timer';
-import { useState } from 'react'
+import { SocketContext } from '@/app/context/socket';
 
-export const CreatorScreen = () => {
-  const [timer, setTimer] = useState(30);
+export const CreatorScreen = ({ question, options }) => {
+  const [playerList, setPlayerList] = useState([]);
+  const socket = useContext(SocketContext);
 
-  const options = [
-    'Yes',
-    'No',
-    'Maybe',
-    'I dont know'
-  ];
 
-  const playerList = [
-    { username: 'Player 1', score: 0, answer: true },
-    { username: 'Player 2', score: 0, answer: false },
-    { username: 'Player 3', score: 0, answer: true },
-    { username: 'Player 4', score: 0, answer: false },
-    { username: 'Player 5', score: 0, answer: true },
-    { username: 'Player 6', score: 0, answer: false },
-    { username: 'Player 7', score: 0, answer: true },
-    { username: 'Player 8', score: 0, answer: false },
-    { username: 'Player 9', score: 0, answer: true },
-    { username: 'Player 10', score: 0, answer: false },
-    { username: 'Player 11', score: 0, answer: true },
-    { username: 'Player 12', score: 0, answer: false },
-    { username: 'Player 13', score: 0, answer: true },
-    { username: 'Player 14', score: 0, answer: false },
-    { username: 'Player 15', score: 0, answer: true },
-    { username: 'Player 16', score: 0, answer: false },
-    { username: 'Player 17', score: 0, answer: true },
-    { username: 'Player 18', score: 0, answer: false },
-    { username: 'Player 19', score: 0, answer: true },
-    { username: 'Player 20', score: 0, answer: false },
-  ];
+  useEffect(() => {
+    socket?.on('player-answered', (data) => {
+      const findPlayer = playerList.find(player => player.socket === data.socket);
+      if (findPlayer) {
+        findPlayer.answered = true;
+        setPlayerList([...playerList]);
+      }
+    })
+
+    return () => {
+      socket?.off('player-answered');
+    }
+
+  }, [])
 
   return (
     <div className="container text-white">
 
       <div className="gameData w-full flex justify-between items-end">
         <div className="timerCount w-1/4">
-          <Timer seconds={timer} />
+          <Timer />
         </div>
 
         <div className="creatorAcess w-1/3 flex flex-col gap-2">
@@ -55,12 +44,12 @@ export const CreatorScreen = () => {
         </div>
 
         <div className="playerList w-1/4">
-          <Playerlist players={playerList} />
+          <Playerlist players={playerList} playing />
         </div>
       </div>
 
       <div className="gameQuestion">
-        <QuestionAnswer question={'Is c# a good language?'} options={options} disabled />
+        <QuestionAnswer question={question} options={options} disabled />
       </div>
     </div>
   )
