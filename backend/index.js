@@ -19,7 +19,7 @@ const io = new Server(server, {
 });
 
 app.use(cors({
-  origin: 'http://192.168.1.180:3000',
+  origin: 'http://192.168.1.200:3000',
   methods: ['GET', 'POST'],
 }));
 

@@ -56,7 +56,7 @@ export const CreateNewGame = ({updateStep }) => {
 
     try {
       const response = await axios.post(
-        "http://192.168.1.180:5050/upload",
+        "http://192.168.1.200:5050/upload",
         formData,
         {
           headers: {
