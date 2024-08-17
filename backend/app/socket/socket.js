@@ -1,3 +1,4 @@
+const { call } = require('../app');
 const Player = require('../player/player');
 
 let games = [];
@@ -11,7 +12,7 @@ module.exports = (io) => {
     // socket location
     const socketLocation = socket.handshake.address;
 
-    console.log('Socket from ' + socketLocation + ' connected at ' + time);
+    console.log('Socket' + ` (${socket.id}) ` + ' from ' + socketLocation + ' connected at ' + time);
 
     socket.on('create-game', (gameSettings, callback) => {
       console.log('gamecreated #' + games.length + 1);
@@ -31,9 +32,14 @@ module.exports = (io) => {
     });
 
     // game events
-    socket.on('emit-question', (gameid) => {
+    socket.on('start-game', () => {
+      console.log('sv-side: start-game');
+      startGame(io, socket.id);
+    })
+
+    socket.on('emit-question', (gameid, callback) => {
       console.log('sv-side: emit-question');
-      emitNextQuestion(io, gameid);
+      emitNextQuestion(gameid, callback);
     });
 
     socket.on('player-answer', (socket, data) => {
@@ -69,6 +75,8 @@ function createGame(gameSettings, socket, callback) {
     console.error(error);
   }
 }
+
+
 
 function joinGame(io, socket, data, callback) {
   try {
@@ -216,7 +224,27 @@ function findPlayerBySocketId(game, socketId) {
 }
 
 // game events
-function emitNextQuestion(io, gameid) {
+
+function startGame(io, gameid) {
+  try {
+    const game = findGameById(gameid);
+
+    if (!game)
+      return;
+
+    // start game timer
+    game.gameSettings.timer = setInterval(() => {
+      // Emit the time-ended event to game creator
+      io.to(game.gameid.toString()).emit('time-ended');
+    }, game.gameSettings.timePerQuestion * 1000);
+
+    // Emit the start-game event to all players in the game
+    io.to(game.gameid.toString()).emit('creator-start-game');
+  } catch (error) {
+    console.error(error);
+  }
+}
+function emitNextQuestion(gameid, callback) {
   try {
     const game = findGameById(gameid);
 
@@ -229,13 +257,12 @@ function emitNextQuestion(io, gameid) {
     // Emit the next-question event to all players in the game
 
     console.log('currentQuestion: ', currentQuestion);
-    
-    io.to(game.gameid.toString()).emit('next-question', {
-      data: currentQuestion,
-    });
-
 
     game.currentQuestionIndex++;
+
+
+    // Emit the next-question event to all players in the game
+    callback({ server: currentQuestion });
   } catch (error) {
     console.error(error);
   }

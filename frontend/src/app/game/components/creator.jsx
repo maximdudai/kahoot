@@ -34,12 +34,12 @@ export const CreatorScreen = ({ question, options }) => {
         </div>
 
         <div className="creatorAcess w-1/3 flex flex-col gap-2">
-          <button className="bg-blue-500 p-2 rounded-md shadow-lg">End Game</button>
-          <button className="bg-blue-500 p-2 rounded-md shadow-lg">Increase Timer (+10 sec)</button>
-          <button className="bg-blue-500 p-2 rounded-md shadow-lg">Give a hint (removing an option)</button>
+          <button className="bg-blue-500 p-2 rounded-md shadow-lg hover:bg-blue-500/80">End Game</button>
+          <button className="bg-blue-500 p-2 rounded-md shadow-lg hover:bg-blue-500/80">Increase Timer (+10 sec)</button>
+          <button className="bg-blue-500 p-2 rounded-md shadow-lg hover:bg-blue-500/80">Give a hint (removing an option)</button>
           <div className="manageQuestion flex gap-2 justify-between">
-            <button className="bg-red-600 w-full p-2 rounded-md shadow-lg">Previous Question</button>
-            <button className="bg-red-600 w-full p-2 rounded-md shadow-lg">Next Question</button>
+            <button className="bg-red-600/60 w-full p-2 rounded-md shadow-lg hover:bg-red-600">Previous Question</button>
+            <button className="bg-red-600/60 w-full p-2 rounded-md shadow-lg hover:bg-red-600">Next Question</button>
           </div>
         </div>
 

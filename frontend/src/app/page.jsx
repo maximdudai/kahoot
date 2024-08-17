@@ -33,7 +33,7 @@ export default function Home() {
           localStorage.setItem('socket', socket.id);
           localStorage.setItem('game', JSON.stringify(response?.gameData));
   
-          router.push('/join');
+          router.push('/join', undefined, { shallow: true });
         });
       }
     }

@@ -9,7 +9,7 @@ export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const newSocket = io('http://192.168.1.200:5050'); // Initialize the socket connection
+    const newSocket = io('http://192.168.1.180:5050'); // Initialize the socket connection
     setSocket(newSocket);
 
     return () => {

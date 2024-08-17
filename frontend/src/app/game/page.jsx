@@ -14,53 +14,35 @@ export default function Game() {
   const socket = useContext(SocketContext);
 
   useEffect(() => {
-    const handleConnect = () => {
-      const gameDataString = localStorage.getItem("game");
-      
-      if (gameDataString) {
-        const gameData = JSON.parse(gameDataString); // Parse the JSON string into an object
-        
-        console.log(socket.id, gameData.creator);
 
-        setIsCreator(socket.id === gameData.creator);
-      }
-    };
+    const gameData = JSON.parse(localStorage.getItem("game"));
+    
+    if (gameData) {
+      // Compare creator socket with client socket.id
+      const isCreatorSocketEqual = gameData.creator === socket.id;
+      setIsCreator(isCreatorSocketEqual);
 
-    // Check if the socket is already connected
-    if (socket && socket.connected) {
-      handleConnect();
-    } else if (socket) {
-      // Listen for the 'connect' event
-      socket.on('connect', handleConnect);
+    } else {
+      console.error("No game data found in localStorage.");
     }
+  }, [])
 
-    return () => {
-      if (socket) {
-        socket.off('connect', handleConnect);
-      }
-    };
-  }, [socket]);
-  
   useEffect(() => {
-    const gameNextQuestion = (data) => {
-      console.log(data);
-      
-      const { question, options } = data;
-      
-      setGameQuestion(question);
-      setGameOptions(options);
-    };
-
-    if (socket) {
-      socket.on("next-question", gameNextQuestion);
-    }
-
+  
+    const gameData = JSON.parse(localStorage.getItem("game"));
+    const gameId = gameData?.gameid;
+  
+    // Emit event to the server to get the question
+    socket?.emit("emit-question", gameId, (data) => {
+      setGameQuestion(data?.server.question);
+      setGameOptions(data?.server.options);      
+    });
+  
     return () => {
-      if (socket) {
-        socket.off("next-question", gameNextQuestion);
-      }
+      socket.off("emit-question");
     };
-  }, [socket]);
+  }, []);
+  
 
   if (isCreator === null) {
     return <div>Loading...</div>;

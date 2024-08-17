@@ -14,13 +14,13 @@ export default function Join() {
     const cancelGame = () => {
       alert("Game has been cancelled.");
       
-      router.push("/");
+      router.push("/", undefined, { shallow: true });
     }
     socket?.on("cancel-game", cancelGame);
 
-    socket?.on('game-start', ({ }) => {
+    socket?.on('creator-start-game', () => {
       
-      router.push('/game');
+      router.push('/game', undefined, { shallow: true });
     });
 
     return () => {

@@ -1,10 +1,12 @@
 import { Playerlist } from "@/app/components/playerlist";
 import { SocketContext } from "@/app/context/socket";
 import { useState, useEffect, useContext } from "react";
+import { useRouter } from "next/navigation";
 
 export const WaitingPlayers = ({ updateStep }) => {
   const [players, setPlayers] = useState(0);
   const [totalPlayers, setTotalPlayers] = useState([]);
+  let router = useRouter();
 
   let socket = useContext(SocketContext);
 
@@ -39,7 +41,9 @@ export const WaitingPlayers = ({ updateStep }) => {
   };
 
   const handleStartGame = () => {
-    socket?.emit("emit-question", (socket.id));
+    socket?.emit("start-game");
+
+    router.push("/game", undefined, { shallow: true });
   }
 
   return (

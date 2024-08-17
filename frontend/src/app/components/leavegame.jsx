@@ -14,7 +14,7 @@ export const LeaveGame = () => {
     localStorage.removeItem("game");
 
     socket?.emit("leave-game");
-    router.push("/");
+    router.push("/", undefined, { shallow: true });
   };
 
   return (

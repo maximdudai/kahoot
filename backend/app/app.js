@@ -1,12 +1,12 @@
 // app.js
+
 const express = require('express');
-
 const app = express();
-
+const cors = require('cors');
 
 // Set up CORS
 app.use(cors({
-  origin: 'http://192.168.1.200:3000',
+  origin: `${process.env.SERVER_IP}:${process.env.SERVER_PORT}`,
   methods: ['GET', 'POST'],
 }));
 
