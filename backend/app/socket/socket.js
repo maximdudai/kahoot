@@ -1,7 +1,7 @@
-const { call } = require('../app');
 const Player = require('../player/player');
 
 let games = [];
+let gameTimer = [];
 
 module.exports = (io) => {
   io.on('connection', (socket) => {
@@ -37,9 +37,9 @@ module.exports = (io) => {
       startGame(io, socket.id);
     })
 
-    socket.on('emit-question', (gameid, callback) => {
+    socket.on('emit-question', (gameid, increment, callback) => {
       console.log('sv-side: emit-question');
-      emitNextQuestion(gameid, callback);
+      emitGameQuestion(gameid, increment, callback);
     });
 
     socket.on('player-answer', (socket, data) => {
@@ -199,7 +199,7 @@ function findGameById(id) {
     const game = games?.find((game) => game.gameid === id);
 
     if (!game) {
-      console.log("Game not found");
+      console.log("Game not found: " + id);
       return null;
     }
 
@@ -232,43 +232,52 @@ function startGame(io, gameid) {
     if (!game)
       return;
 
-    // start game timer
-    game.gameSettings.timer = setInterval(() => {
-      // Emit the time-ended event to game creator
-      io.to(game.gameid.toString()).emit('time-ended');
+    // create a timer for the game
+    gameTimer[gameid] = setInterval(() => {
+
+      // Emit the time-end event to all players in the game
+
+      io.to(gameid).emit('time-end', []);
     }, game.gameSettings.timePerQuestion * 1000);
 
-    // Emit the start-game event to all players in the game
     io.to(game.gameid.toString()).emit('creator-start-game');
   } catch (error) {
     console.error(error);
   }
 }
-function emitNextQuestion(gameid, callback) {
+function getCurrentGameQuestion(gameid, qid) {
+
+  const game = findGameById(gameid);
+
+  if (!game)
+    return;
+
+  const localGameSettings = JSON.parse(JSON.stringify(game.gameSettings));
+  const question = localGameSettings.questions[qid];
+
+  return question;
+}
+function emitGameQuestion(gameid, increment = false, callback) {
   try {
+    console.log('gameid: ' + gameid);
+
     const game = findGameById(gameid);
 
     if (!game)
       return;
 
-    const gameSettingsCopy = JSON.parse(JSON.stringify(game?.gameSettings));
-    const currentQuestion = gameSettingsCopy.questions[game.currentQuestionIndex ?? 0];
+    const incrementQuestion = increment ? game.currentQuestionIndex++ : game.currentQuestionIndex;
 
-    // Emit the next-question event to all players in the game
+    console.log('currentQuestionIndex: ' + game.currentQuestionIndex);
+    console.log('incrementQuestion: ' + incrementQuestion);
 
-    console.log('currentQuestion: ', currentQuestion);
+    const currentQuestion = getCurrentGameQuestion(gameid, incrementQuestion);
 
-    game.currentQuestionIndex++;
-
-
-    // Emit the next-question event to all players in the game
     callback({ server: currentQuestion });
   } catch (error) {
     console.error(error);
   }
 }
-
-
 
 function onPlayerAnswer(io, socket, data) {
   try {

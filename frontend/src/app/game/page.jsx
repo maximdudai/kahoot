@@ -32,10 +32,13 @@ export default function Game() {
     const gameData = JSON.parse(localStorage.getItem("game"));
     const gameId = gameData?.gameid;
   
-    // Emit event to the server to get the question
-    socket?.emit("emit-question", gameId, (data) => {
-      setGameQuestion(data?.server.question);
-      setGameOptions(data?.server.options);      
+    // gameId, true | false = increment question number
+    // data -> received as response from the server
+    socket?.emit("emit-question", gameId, false, (data) => {
+      const { question, options } = data.server;
+      
+      setGameQuestion(question);
+      setGameOptions(options);      
     });
   
     return () => {
