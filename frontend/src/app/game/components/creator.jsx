@@ -15,7 +15,7 @@ export const CreatorScreen = ({ question, options }) => {
       const findPlayer = playerList.find(player => player.socket === data.socket);
       if (findPlayer) {
         findPlayer.answered = true;
-        setPlayerList([...playerList]);
+        setPlayerList(playerList);
       }
     })
 

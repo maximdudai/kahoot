@@ -22,20 +22,18 @@ export default function Home() {
         return;
       }
   
-      if (socket) {
-        socket.emit("join-game", { gameCode, username }, (response) => {
-          if (response?.success == false) {
-            alert("Game not found");
-            return;
-          }
-  
-          localStorage.setItem('username', username);
-          localStorage.setItem('socket', socket.id);
-          localStorage.setItem('game', JSON.stringify(response?.gameData));
-  
-          router.push('/join', undefined, { shallow: true });
-        });
-      }
+      socket?.emit("join-game", { gameCode, username }, (response) => {
+        if (response?.success == false) {
+          alert("Game not found");
+          return;
+        }
+
+        localStorage.setItem('username', username);
+        localStorage.setItem('socket', socket.id);
+        localStorage.setItem('game', JSON.stringify(response?.gameData));
+
+        router.push('/join', undefined, { shallow: true });
+      });
     }
     catch (e) {
       console.error(e);

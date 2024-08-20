@@ -18,17 +18,17 @@ export const QuestionAnswer = ({ question, options, onResponse, disabled }) => {
       </div>
 
       <div className="options w-full">
-        <ul className="w-full grid grid-cols-2 gap-2">
+        <ul className="w-full grid grid-cols-1 md:grid-cols-2 p-2 gap-2">
           {options?.map((option, index) => (
             <li
               key={index}
               id={index}
               onClick={() => handleResponse(index)}
-              className={`cursor-pointer w-full min-h-20 flex items-center border-2 border-gray-800 rounded-md shadow-md text-lg p-2 ${
+              className={`w-full min-h-20 flex items-center border-2 border-gray-800 rounded-md shadow-md text-lg p-2 ${
                 disabled ? 'bg-white/40 cursor-default' : 
                 response === index
                   ? "bg-green-500"
-                  : "bg-blue-600 hover:bg-blue-400"
+                  : "bg-blue-600 hover:bg-blue-400 cursor-pointer"
               }`}
             >
               {option}

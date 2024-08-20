@@ -14,13 +14,23 @@ export const WaitingPlayers = ({ updateStep }) => {
     const handleJoinGame = (player) => {
       setPlayers((players) => players + 1);
       setTotalPlayers((totalPlayers) => [...totalPlayers, player]);
+      
+      // Update localStorage with the new player added
+      const localGameData = JSON.parse(localStorage.getItem("game"));
+      localGameData.players.push(player);
+      localStorage.setItem("game", JSON.stringify(localGameData)); // Save back to localStorage
     };
 
     const handlePlayerLeft = (playerData) => {
+      const newTotalPlayers = totalPlayers.filter((player) => player.socket !== playerData.socket);
+      
       setPlayers((players) => players - 1);
-      setTotalPlayers((totalPlayers) =>
-        totalPlayers.filter((player) => player.socket !== playerData.socket)
-      );
+      setTotalPlayers(newTotalPlayers);
+
+      // Update localStorage with the player removed
+      const localGameData = JSON.parse(localStorage.getItem("game"));
+      localGameData.players = newTotalPlayers;
+      localStorage.setItem("game", JSON.stringify(localGameData));
     };
 
     if (socket) {
@@ -33,7 +43,7 @@ export const WaitingPlayers = ({ updateStep }) => {
         socket?.off('player-left', handlePlayerLeft);
       };
     }
-  }, [socket, totalPlayers]);
+  }, []);
 
   const handleCancelGame = () => {
     socket?.emit("cancel-game");

@@ -92,12 +92,11 @@ function joinGame(io, socket, data, callback) {
     // Add the player to the game
     addPlayerToGame(username, socket, gameData);
 
-    // Emit the player-join event to creator 
     io.to(gameData.gameid.toString()).emit('player-join', {
       username,
-      socket: socket.id
+      socket: socket.id,
+      score: 0
     });
-
 
     //send gameData object without players and questions
     const newGameData = JSON.parse(JSON.stringify(gameData));
@@ -168,10 +167,9 @@ function cancelGame(io, gameid) {
 }
 
 function addPlayerToGame(username, socket, game) {
-
   try {
     const newPlayer = new Player(username, socket.id, game.gameid);
-    game?.players.push(newPlayer);
+    game?.players.push(newPlayer.toJSON());
 
     socket.join(game.gameid.toString());
   }
@@ -232,19 +230,34 @@ function startGame(io, gameid) {
     if (!game)
       return;
 
-    // create a timer for the game
-    gameTimer[gameid] = setInterval(() => {
-
-      // Emit the time-end event to all players in the game
-
-      io.to(gameid).emit('time-end', []);
-    }, game.gameSettings.timePerQuestion * 1000);
-
     io.to(game.gameid.toString()).emit('creator-start-game');
   } catch (error) {
     console.error(error);
   }
 }
+
+function startGameTimer(gameId) {
+  const game = games.find(game => game.gameId === gameId);
+  
+  if (!game) return;
+
+  let timeRemaining = game?.gameSettings.time;
+
+  // Save the interval in the game object so we can clear it later if needed
+  game.timer = setInterval(() => {
+      timeRemaining--;
+
+      // Emit the remaining time to all clients in the room
+      io.to(gameId).emit('timer-update', { timeRemaining });
+
+      // If time is up, clear the interval and emit time-up event
+      if (timeRemaining <= 0) {
+          clearInterval(game.timer);
+          io.to(gameId).emit('time-up');
+      }
+  }, 1000); // Update every second
+}
+
 function getCurrentGameQuestion(gameid, qid) {
 
   const game = findGameById(gameid);
