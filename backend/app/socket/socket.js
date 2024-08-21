@@ -39,7 +39,7 @@ module.exports = (io) => {
 
     socket.on('emit-question', (gameid, increment, callback) => {
       console.log('sv-side: emit-question');
-      emitGameQuestion(gameid, increment, callback);
+      emitGameQuestion(io, gameid, increment, callback);
     });
 
     socket.on('player-answer', (socket, data) => {
@@ -238,24 +238,24 @@ function startGame(io, gameid) {
 
 function startGameTimer(gameId) {
   const game = games.find(game => game.gameId === gameId);
-  
+
   if (!game) return;
 
   let timeRemaining = game?.gameSettings.time;
 
   // Save the interval in the game object so we can clear it later if needed
   game.timer = setInterval(() => {
-      timeRemaining--;
+    timeRemaining--;
 
-      // Emit the remaining time to all clients in the room
-      io.to(gameId).emit('timer-update', { timeRemaining });
+    // Emit the remaining time to all clients in the room
+    io.to(gameId).emit('timer-update', { timeRemaining });
 
-      // If time is up, clear the interval and emit time-up event
-      if (timeRemaining <= 0) {
-          clearInterval(game.timer);
-          io.to(gameId).emit('time-up');
-      }
-  }, 1000); // Update every second
+    // If time is up, clear the interval and emit time-up event
+    if (timeRemaining <= 0) {
+      clearInterval(game.timer);
+      io.to(gameId).emit('time-up');
+    }
+  }, timeRemaining * 1000); // Update every second
 }
 
 function getCurrentGameQuestion(gameid, qid) {
@@ -270,27 +270,33 @@ function getCurrentGameQuestion(gameid, qid) {
 
   return question;
 }
-function emitGameQuestion(gameid, increment = false, callback) {
+function emitGameQuestion(io, gameid, increment = false, callback) {
   try {
-    console.log('gameid: ' + gameid);
-
     const game = findGameById(gameid);
 
     if (!game)
       return;
 
-    const incrementQuestion = increment ? game.currentQuestionIndex++ : game.currentQuestionIndex;
 
-    console.log('currentQuestionIndex: ' + game.currentQuestionIndex);
-    console.log('incrementQuestion: ' + incrementQuestion);
+    // prevent incrementing the question index if the game is over
+    if (increment && game.currentQuestionIndex < game.gameSettings.questions.length - 1) {
+      game.currentQuestionIndex++;
+    }
 
-    const currentQuestion = getCurrentGameQuestion(gameid, incrementQuestion);
+    const currentQuestion = getCurrentGameQuestion(gameid, game.currentQuestionIndex);
 
-    callback({ server: currentQuestion });
+    // Emit the question to all clients in the game room
+    io.to(gameid).emit('new-question', { server: currentQuestion });
+
+    // Callback to the creator if needed
+    if (callback)
+      callback({ server: currentQuestion });
+    
   } catch (error) {
     console.error(error);
   }
 }
+
 
 function onPlayerAnswer(io, socket, data) {
   try {
