@@ -4,6 +4,7 @@ import { useContext, useEffect, useState } from "react";
 import { SocketContext } from "@/app/context/socket";
 import { CreatorScreen } from "./components/creator";
 import { PlayerScreen } from "./components/player";
+import { QuestionAction } from "../utils/question";
 
 export default function Game() {
   const [isCreator, setIsCreator] = useState(null);
@@ -18,7 +19,7 @@ export default function Game() {
 
     if (gameData) {
       // Compare creator socket with client socket.id
-      const isCreatorSocketEqual = gameData.creator === socket.id;
+      const isCreatorSocketEqual = gameData.gameid === socket.id;
       setIsCreator(isCreatorSocketEqual);
     } else {
       console.error("No game data found in localStorage.");
@@ -26,7 +27,7 @@ export default function Game() {
   }, []);
 
   // Function to fetch the next question, used by the creator
-  const fetchNextQuestion = (increment = false) => {
+  const fetchNextQuestion = (increment = QuestionAction.MAINTAIN) => {
     const gameData = JSON.parse(localStorage.getItem("game"));
     const gameId = gameData?.gameid;
 
@@ -36,11 +37,6 @@ export default function Game() {
       setGameQuestion(question);
       setGameOptions(options);
     });
-  };
-
-  // Called when the game creator requests the next question
-  const handleGameQuestion = (dir) => {
-    fetchNextQuestion(true);
   };
 
   // Called when the page loads to fetch the initial question
@@ -68,7 +64,7 @@ export default function Game() {
     <CreatorScreen
       question={gameQuestion}
       options={gameOptions}
-      handleNextQuestion={handleGameQuestion}
+      handleNextQuestion={fetchNextQuestion}
     />
   ) : (
     <PlayerScreen question={gameQuestion} options={gameOptions} />

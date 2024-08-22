@@ -27,6 +27,7 @@
   font-family: "Kanit", sans-serif;
   font-weight: 100;
   font-style: normal;
+  user-select: none;
 }
 
 .bgImage {

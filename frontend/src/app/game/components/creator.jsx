@@ -4,8 +4,9 @@ import { Playerlist } from "@/app/components/playerlist";
 import { QuestionAnswer } from "@/app/components/questionanswer";
 import { Timer } from "@/app/components/timer";
 import { SocketContext } from "@/app/context/socket";
+import { QuestionAction } from "@/app/utils/question";
 
-export const CreatorScreen = ({ question, options, handleGameQuestion }) => {
+export const CreatorScreen = ({ question, options, handleNextQuestion }) => {
   const [playerList, setPlayerList] = useState([]);
   const socket = useContext(SocketContext);
 
@@ -45,13 +46,13 @@ export const CreatorScreen = ({ question, options, handleGameQuestion }) => {
           <div className="manageQuestion flex gap-2 justify-between">
             <button
               className="bg-red-600/60 w-full p-2 rounded-md shadow-lg hover:bg-red-600"
-              onClick={() => handleGameQuestion(false)}
+              onClick={() => handleNextQuestion(QuestionAction.DECREMENT)}
             >
               Previous Question
             </button>
             <button
               className="bg-red-600/60 w-full p-2 rounded-md shadow-lg hover:bg-red-600"
-              onClick={() => handleGameQuestion(true)}
+              onClick={() => handleNextQuestion(QuestionAction.INCREMENT)}
             >
               Next Question
             </button>

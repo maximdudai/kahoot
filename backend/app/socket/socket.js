@@ -3,6 +3,13 @@ const Player = require('../player/player');
 let games = [];
 let gameTimer = [];
 
+const QuestionAction = {
+  INCREMENT: 'increment',
+  DECREMENT: 'decrement',
+  MAINTAIN: 'maintain'
+};
+
+
 module.exports = (io) => {
   io.on('connection', (socket) => {
 
@@ -15,7 +22,6 @@ module.exports = (io) => {
     console.log('Socket' + ` (${socket.id}) ` + ' from ' + socketLocation + ' connected at ' + time);
 
     socket.on('create-game', (gameSettings, callback) => {
-      console.log('gamecreated #' + games.length + 1);
       createGame(gameSettings, socket, callback);
     });
 
@@ -59,14 +65,10 @@ function createGame(gameSettings, socket, callback) {
     const game = {
       gameSettings,
       gameid: socket.id,
-      creator: socket.id,
       players: [],
       currentQuestionIndex: 0,
     };
     games.push(game);
-
-    // Add the player to the game
-    addPlayerToGame('creator', socket, game);
 
     // Emit the create-game event to the creator
     callback({ gameData: game });
@@ -81,6 +83,8 @@ function createGame(gameSettings, socket, callback) {
 function joinGame(io, socket, data, callback) {
   try {
     const { gameCode, username } = data;
+
+    console.log('Joining game: ' + gameCode + ' as ' + username + ' with socket ' + socket.id);
 
     const gameData = findGameByCode(gameCode);
 
@@ -98,9 +102,7 @@ function joinGame(io, socket, data, callback) {
       score: 0
     });
 
-    //send gameData object without players and questions
     const newGameData = JSON.parse(JSON.stringify(gameData));
-    delete newGameData.players;
     delete newGameData.gameSettings.questions;
 
     callback({ gameData: newGameData });
@@ -169,7 +171,7 @@ function cancelGame(io, gameid) {
 function addPlayerToGame(username, socket, game) {
   try {
     const newPlayer = new Player(username, socket.id, game.gameid);
-    game?.players.push(newPlayer.toJSON());
+    game?.players.push(newPlayer);
 
     socket.join(game.gameid.toString());
   }
@@ -270,7 +272,7 @@ function getCurrentGameQuestion(gameid, qid) {
 
   return question;
 }
-function emitGameQuestion(io, gameid, increment = false, callback) {
+function emitGameQuestion(io, gameid, increment = QuestionAction.MAINTAIN, callback) {
   try {
     const game = findGameById(gameid);
 
@@ -279,8 +281,20 @@ function emitGameQuestion(io, gameid, increment = false, callback) {
 
 
     // prevent incrementing the question index if the game is over
-    if (increment && game.currentQuestionIndex < game.gameSettings.questions.length - 1) {
-      game.currentQuestionIndex++;
+    switch (increment) {
+      case QuestionAction.INCREMENT:
+        if (game.currentQuestionIndex < game.gameSettings.questions.length - 1) {
+          game.currentQuestionIndex++;
+        }
+        break;
+      case QuestionAction.DECREMENT:
+        if (game.currentQuestionIndex > 0) {
+          game.currentQuestionIndex--;
+        }
+        break;
+      case QuestionAction.MAINTAIN:
+      default:
+        break;
     }
 
     const currentQuestion = getCurrentGameQuestion(gameid, game.currentQuestionIndex);
@@ -291,7 +305,7 @@ function emitGameQuestion(io, gameid, increment = false, callback) {
     // Callback to the creator if needed
     if (callback)
       callback({ server: currentQuestion });
-    
+
   } catch (error) {
     console.error(error);
   }

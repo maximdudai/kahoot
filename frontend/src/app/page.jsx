@@ -7,6 +7,7 @@ import Link from "next/link";
 import { RiUserReceived2Line } from "react-icons/ri";
 import { MdOutlinePassword } from "react-icons/md";
 import { SocketContext } from "./context/socket";
+import { Kahoot } from "./components/title";
 
 export default function Home() {
   const [username, setUsername] = useState("");
@@ -32,7 +33,7 @@ export default function Home() {
         localStorage.setItem("socket", socket.id);
         localStorage.setItem("game", JSON.stringify(response?.gameData));
 
-        router.push("/join", undefined, { shallow: true });
+        router.push("/waiting", undefined, { shallow: true });
       });
     } catch (e) {
       console.error(e);
@@ -41,17 +42,7 @@ export default function Home() {
 
   return (
     <div className="text-black w-full md:w-1/2 lg:w-1/3 p-2 flex flex-col gap-3  justify-center rounded-md">
-      <div className="title p-2 text-white">
-        <h1 className="text-center text-green-500 text-8xl font-bold tracking-widest italic flex justify-center items-center">
-          <span className="font-kahoot">Kah</span>
-          <img
-            className="w-16 mx-1"
-            src="https://www.pngmart.com/files/20/Talking-Comment-PNG-Free-Download.png"
-            alt="Kahoot"
-          />
-          <span className="font-kahoot">t</span>
-        </h1>
-      </div>
+      <Kahoot />
       <div className="authUsername font-bold text-xl p-2 flex items-center justify-between border-8 border-green-500 rounded-full">
         <input
           className="bg-transparent w-full text-white placeholder:text-white px-2 focus:outline-none focus:placeholder:text-gray-400"
@@ -59,6 +50,7 @@ export default function Home() {
           id="username"
           placeholder="Username"
           onChange={(e) => setUsername(e.target.value)}
+          maxLength="15"
           required
         />
         <RiUserReceived2Line className="w-10 h-full text-green-500" />
