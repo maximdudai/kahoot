@@ -1,16 +1,27 @@
-import { useState } from "react";
+import { useState, useContext, useEffect } from "react";
+import { SocketContext } from "../context/socket";
 
-export const QuestionAnswer = ({ question, options, onResponse, disabled }) => {
+export const QuestionAnswer = ({ question, options, disabled }) => {
   const [response, setResponse] = useState(null);
+  const socket = useContext(SocketContext);
 
-  const handleResponse = (id) => {
-    if (!disabled) {
-      setResponse(id);
+  const handleResponse = (responseId) => {
+    if (disabled) return;
 
-      onResponse(id);
-    }
+    const localGameData = JSON.parse(localStorage.getItem("game"));
+    const gameId = localGameData.gameid;
+
+    setResponse(responseId);
+    socket?.emit("player-answer", {
+      gameid: gameId,
+      response: responseId,
+    });
   };
-  
+
+  useEffect(() => {
+    setResponse(null);
+  }, [question])
+
   return (
     <div className="questionData mt-10 w-full flex justify-center items-center flex-col">
       <div className="bg-green-500 p-2 border-b-[1px] border-t-[1px] border-gray-300/20 w-full my-3">
@@ -25,8 +36,9 @@ export const QuestionAnswer = ({ question, options, onResponse, disabled }) => {
               id={index}
               onClick={() => handleResponse(index)}
               className={`w-full min-h-20 flex items-center border-2 border-gray-800 rounded-md shadow-md text-lg p-2 ${
-                disabled ? 'bg-white/40 cursor-default' : 
-                response === index
+                disabled
+                  ? "bg-white/40 cursor-default"
+                  : response === index
                   ? "bg-green-500"
                   : "bg-blue-600 hover:bg-blue-400 cursor-pointer"
               }`}

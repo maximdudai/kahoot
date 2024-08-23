@@ -30,8 +30,8 @@ export const Timer = () => {
         <MdOutlineTimer className="w-10 m-auto h-auto p-2 rounded-md" />
       </div>
       <p className="text-8xl font-bold">{timer ?? "--"}</p>
-      <p className="text-2xl w-32 bg-white/30 text-center text-white">
-        seconds
+      <p className="text-sm tracking-widest w-32 bg-white/30 text-center text-white">
+        time left
       </p>
     </div>
   );
