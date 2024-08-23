@@ -16,10 +16,10 @@ module.exports = (io) => {
     // current time
     let time = new Date().toLocaleTimeString();
 
-    // socket location
-    const socketLocation = socket.handshake.address;
-
-    console.log('Socket' + ` (${socket.id}) ` + ' from ' + socketLocation + ' connected at ' + time);
+    // requested events
+    socket.onAny((event, ...args) => {
+      console.log(event, args);
+    })
 
     socket.on('create-game', (gameSettings, callback) => {
       createGame(gameSettings, socket, callback);
@@ -39,21 +39,18 @@ module.exports = (io) => {
 
     // game events
     socket.on('start-game', () => {
-      console.log('sv-side: start-game');
       startGame(io, socket.id);
     })
 
     socket.on('emit-question', (gameid, increment, callback) => {
-      console.log('sv-side: emit-question');
       emitGameQuestion(io, gameid, increment, callback);
     });
 
-    socket.on('player-answer', (socket, data) => {
+    socket.on('player-answer', (data) => {
       onPlayerAnswer(io, socket, data);
     });
 
     socket.on('disconnect', () => {
-      console.log('Socket from ' + socketLocation + ' disconnected at ' + time);
       EmitEventOnDisconnect(io, socket);
     });
   });
@@ -83,8 +80,6 @@ function createGame(gameSettings, socket, callback) {
 function joinGame(io, socket, data, callback) {
   try {
     const { gameCode, username } = data;
-
-    console.log('Joining game: ' + gameCode + ' as ' + username + ' with socket ' + socket.id);
 
     const gameData = findGameByCode(gameCode);
 
@@ -198,10 +193,8 @@ function findGameById(id) {
   try {
     const game = games?.find((game) => game.gameid === id);
 
-    if (!game) {
-      console.log("Game not found: " + id);
+    if (!game)
       return null;
-    }
 
     return game;
   } catch (error) {
@@ -314,8 +307,7 @@ function emitGameQuestion(io, gameid, increment = QuestionAction.MAINTAIN, callb
 
 function onPlayerAnswer(io, socket, data) {
   try {
-    const { gameid, answer } = data;
-
+    const { gameid, response } = data;
     const game = findGameById(gameid);
 
     if (!game)
@@ -324,17 +316,20 @@ function onPlayerAnswer(io, socket, data) {
     const player = findPlayerBySocketId(game, socket.id);
     const currentQuestion = game?.gameSettings.questions[game.currentQuestionIndex];
 
-    player?.answers.push({
-      question: currentQuestion.question,
-      answer
-    });
+    //update player answer on current question
+    player.answers.push({ question: currentQuestion.question, answer: response });
 
-    io.to(game.gameid.toString()).emit('player-answered', {
-      username: player.username,
-      socket: socket.id,
-    });
+    io.to(game.gameid.toString()).emit('player-answered', { socketId: socket.id });
   }
   catch (error) {
     console.error(error);
   }
+}
+
+function getMemberCorrectPercentage(game, member) {
+  const correctAnswers = member.answers.filter(
+    (answer) => answer.answer === game.gameSettings.questions[member.answers.indexOf(answer)].correctAnswer
+  );
+
+  return (correctAnswers.length / game.gameSettings.questions.length) * 100;
 }

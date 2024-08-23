@@ -5,26 +5,47 @@ import { QuestionAnswer } from "@/app/components/questionanswer";
 import { Timer } from "@/app/components/timer";
 import { SocketContext } from "@/app/context/socket";
 import { QuestionAction } from "@/app/utils/question";
+import { updatePlayersAnswers, updatePlayerAnswer } from "@/app/utils/player";
 
 export const CreatorScreen = ({ question, options, handleNextQuestion }) => {
   const [playerList, setPlayerList] = useState([]);
   const socket = useContext(SocketContext);
 
   useEffect(() => {
-    socket?.on("player-answered", (data) => {
-      const findPlayer = playerList.find(
-        (player) => player.socket === data.socket
+    const localGameData = JSON.parse(localStorage.getItem("game"));
+    if (localGameData) {
+      setPlayerList(localGameData.players || []);
+    }
+
+    const handlePlayerAnswered = (data) => {
+      const { socketId } = data;
+
+      const updatedPlayerList = localGameData.players.map((player) =>
+        player.socket === socketId ? { ...player, answer: true } : player
       );
-      if (findPlayer) {
-        findPlayer.answered = true;
-        setPlayerList(playerList);
-      }
-    });
+
+      setPlayerList(updatedPlayerList);
+
+      localGameData.players = updatedPlayerList;
+      localStorage.setItem("game", JSON.stringify(localGameData));
+    };
+
+    socket?.on("player-answered", handlePlayerAnswered);
+
+    const updatePlayerListWithAnswers = () => {
+      const updatedPlayerList = updatePlayersAnswers(localGameData.players);
+      setPlayerList(updatedPlayerList);
+
+      localGameData.players = updatedPlayerList;
+      localStorage.setItem("game", JSON.stringify(localGameData));
+    };
+
+    updatePlayerListWithAnswers();
 
     return () => {
-      socket?.off("player-answered");
+      socket?.off("player-answered", handlePlayerAnswered);
     };
-  }, []);
+  }, [socket, question]);
 
   return (
     <div className="container text-white">
@@ -60,7 +81,7 @@ export const CreatorScreen = ({ question, options, handleNextQuestion }) => {
         </div>
 
         <div className="playerList w-1/4">
-          <Playerlist players={playerList} playing />
+          <Playerlist playerList={playerList} />
         </div>
       </div>
 

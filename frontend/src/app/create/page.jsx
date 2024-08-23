@@ -9,7 +9,7 @@ import { FaRegCopy } from "react-icons/fa";
 import { TbJson } from "react-icons/tb";
 import { Codesnippet } from "@/app/components/codesnippet";
 
-import { generateGameId } from "@/app/utils/gameid";
+import { generateGameId } from "@/app/utils/game";
 import { SocketContext } from "@/app/context/socket";
 
 export default function CreateNewGame() {

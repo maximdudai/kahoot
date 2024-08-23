@@ -80,7 +80,7 @@ export default function WaitingPlayers() {
           <GameSettings />
 
           <div className="playerList w-full">
-            <Playerlist players={totalPlayers} />
+            <Playerlist playerList={totalPlayers} />
           </div>
 
           {isCreator && (

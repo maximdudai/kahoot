@@ -9,14 +9,6 @@ import { SocketContext } from "@/app/context/socket";
 
 export const PlayerScreen = ({ question, options }) => {
   const [timer, setTimer] = useState();
-  const [response, setResponse] = useState(null);
-  const socket = useContext(SocketContext);
-
-  const handleQuestionResponse = (id) => {
-    setResponse(id);
-
-    socket?.emit("question-response", {});
-  };
 
   return (
     <div className="container">
@@ -28,7 +20,6 @@ export const PlayerScreen = ({ question, options }) => {
         <QuestionAnswer
           question={question}
           options={options}
-          onResponse={handleQuestionResponse}
           disabled={timer}
         />
       </div>
