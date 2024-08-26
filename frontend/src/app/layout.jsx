@@ -3,7 +3,7 @@ import "./globals.css";
 
 import { FaGithub } from "react-icons/fa";
 import Link from "next/link";
-import { SocketProvider } from "./context/socket";
+import SocketProvider from "./context/socket";
 
 const inter = Inter({ subsets: ["latin"] });
 

@@ -33,7 +33,7 @@ module.exports = (io) => {
       EmitEventOnDisconnect(io, socket);
     });
 
-    socket.on('cancel-game', () => {
+    socket.on('server-cancel-game', () => {
       cancelGame(io, socket.id);
     });
 
@@ -97,6 +97,8 @@ function joinGame(io, socket, data, callback) {
       score: 0
     });
 
+    console.log("players: ", gameData.players);
+
     const newGameData = JSON.parse(JSON.stringify(gameData));
     delete newGameData.gameSettings.questions;
 
@@ -154,7 +156,7 @@ function cancelGame(io, gameid) {
     const game = games[gameIndex];
 
     // Emit the cancel-game event to all players in the game
-    io.to(game.gameid.toString()).emit('cancel-game');
+    io.to(game.gameid.toString()).emit('client-cancel-game');
 
     // Remove the game from the list of games
     games.splice(gameIndex, 1);

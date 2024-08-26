@@ -28,3 +28,9 @@ export const updatePlayersAnswers = (playerList) => {
 
   return playerList;
 }
+
+export const isGameCreator = (socket) => {
+  const localGameData = JSON.parse(localStorage.getItem("game"));
+
+  return localGameData?.gameid === socket;
+}

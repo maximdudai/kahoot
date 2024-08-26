@@ -70,14 +70,14 @@ export default function Home() {
 
       <div className="gameButtons flex flex-col md:flex-row justify-center gap-4 cursor-pointer">
         <button
-          className="bg-emerald-500 w-full md:w-1/3 uppercase tracking-widest font-bold text-white p-2 rounded-md hover:scale-110 transform transition-all"
+          className="bg-emerald-500 w-full lg:w-1/3 uppercase tracking-widest font-bold text-white p-2 rounded-md hover:scale-110 transform transition-all"
           onClick={handleJoinGame}
         >
           Join
         </button>
         <Link
           href="/create"
-          className="w-full md:w-1/3 text-center uppercase tracking-widest p-2 rounded-md text-green-500 hover:bg-emerald-500 hover:text-white hover:scale-110 transform transition-all "
+          className="w-full lg:w-1/3 text-center uppercase tracking-widest p-2 rounded-md text-green-500 hover:bg-emerald-500 hover:text-white hover:scale-110 transform transition-all "
         >
           <span className="font-bold">Create Game</span>
         </Link>

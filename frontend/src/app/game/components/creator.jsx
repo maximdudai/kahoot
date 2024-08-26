@@ -6,6 +6,7 @@ import { Timer } from "@/app/components/timer";
 import { SocketContext } from "@/app/context/socket";
 import { QuestionAction } from "@/app/utils/question";
 import { updatePlayersAnswers, updatePlayerAnswer } from "@/app/utils/player";
+import { LeaveGame } from "@/app/components/leavegame";
 
 export const CreatorScreen = ({ question, options, handleNextQuestion }) => {
   const [playerList, setPlayerList] = useState([]);
@@ -55,9 +56,7 @@ export const CreatorScreen = ({ question, options, handleNextQuestion }) => {
         </div>
 
         <div className="creatorAcess w-1/3 flex flex-col gap-2">
-          <button className="bg-blue-500 p-2 rounded-md shadow-lg hover:bg-blue-500/80">
-            End Game
-          </button>
+          <LeaveGame className={"bg-blue-500 p-2 rounded-md shadow-lg hover:bg-blue-500/80"} text="End Game" />
           <button className="bg-blue-500 p-2 rounded-md shadow-lg hover:bg-blue-500/80">
             Increase Timer (+10 sec)
           </button>
@@ -81,7 +80,7 @@ export const CreatorScreen = ({ question, options, handleNextQuestion }) => {
         </div>
 
         <div className="playerList w-1/4">
-          <Playerlist playerList={playerList} />
+          <Playerlist />
         </div>
       </div>
 
