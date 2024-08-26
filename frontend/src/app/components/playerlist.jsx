@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FaRegUserCircle } from "react-icons/fa";
+import { SocketContext } from "../context/socket";
 
 export const Playerlist = () => {
   const [playerList, setPlayerList] = useState([]);
