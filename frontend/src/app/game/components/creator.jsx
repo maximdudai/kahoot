@@ -5,10 +5,10 @@ import { QuestionAnswer } from "@/app/components/questionanswer";
 import { Timer } from "@/app/components/timer";
 import { SocketContext } from "@/app/context/socket";
 import { QuestionAction } from "@/app/utils/question";
-import { updatePlayersAnswers, updatePlayerAnswer } from "@/app/utils/player";
+import { updatePlayersAnswers } from "@/app/utils/player";
 import { LeaveGame } from "@/app/components/leavegame";
 
-export const CreatorScreen = ({ question, options, handleNextQuestion }) => {
+export const CreatorScreen = ({ question, options, timer, handleNextQuestion }) => {
   const [playerList, setPlayerList] = useState([]);
   const socket = useContext(SocketContext);
 
@@ -29,6 +29,9 @@ export const CreatorScreen = ({ question, options, handleNextQuestion }) => {
 
       localGameData.players = updatedPlayerList;
       localStorage.setItem("game", JSON.stringify(localGameData));
+
+      const event = new Event("updateGamePlayers");
+      window.dispatchEvent(event);
     };
 
     socket?.on("player-answered", handlePlayerAnswered);
@@ -39,6 +42,9 @@ export const CreatorScreen = ({ question, options, handleNextQuestion }) => {
 
       localGameData.players = updatedPlayerList;
       localStorage.setItem("game", JSON.stringify(localGameData));
+
+      const event = new Event("updateGamePlayers");
+      window.dispatchEvent(event);
     };
 
     updatePlayerListWithAnswers();
@@ -48,19 +54,35 @@ export const CreatorScreen = ({ question, options, handleNextQuestion }) => {
     };
   }, [socket, question]);
 
+  const handleQuestionHint = () => {
+    const localGameData = JSON.parse(localStorage.getItem("game"));
+
+    socket?.emit("question-hint", { gameid: localGameData.gameid });
+  };
+
+  const handleIncreaseTimer = () => {
+    const localGameData = JSON.parse(localStorage.getItem("game"));
+
+    socket?.emit("increase-timer", { gameid: localGameData.gameid });
+  }
+
   return (
     <div className="container text-white">
       <div className="gameData w-full flex justify-between items-end">
         <div className="timerCount w-1/4">
-          <Timer />
+          <Timer timer={timer} />
         </div>
 
         <div className="creatorAcess w-1/3 flex flex-col gap-2">
           <LeaveGame className={"bg-blue-500 p-2 rounded-md shadow-lg hover:bg-blue-500/80"} text="End Game" />
-          <button className="bg-blue-500 p-2 rounded-md shadow-lg hover:bg-blue-500/80">
+          <button className="bg-blue-500 p-2 rounded-md shadow-lg hover:bg-blue-500/80"
+            onClick={handleIncreaseTimer}
+          >
             Increase Timer (+10 sec)
           </button>
-          <button className="bg-blue-500 p-2 rounded-md shadow-lg hover:bg-blue-500/80">
+          <button className="bg-blue-500 p-2 rounded-md shadow-lg hover:bg-blue-500/80"
+            onClick={handleQuestionHint}
+          >
             Give a hint (removing an option)
           </button>
           <div className="manageQuestion flex gap-2 justify-between">

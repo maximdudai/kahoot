@@ -50,7 +50,12 @@ export default function WaitingPlayers() {
                 Start Game
               </button>
 
-              <LeaveGame text="Cancel Game" />
+              <LeaveGame
+                className={
+                  "w-1/3 uppercase text-sm font-semibold tracking-wider shadow-lg bg-red-600/60 text-white px-4 py-2 rounded-md hover:scale-110 hover:bg-red-600"
+                }
+                text="Cancel Game"
+              />
             </div>
           )}
         </div>

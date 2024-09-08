@@ -50,6 +50,14 @@ module.exports = (io) => {
       onPlayerAnswer(io, socket, data);
     });
 
+    socket.on('question-hint', (data) => {
+      handleQuestionHint(io, data);
+    });
+
+    socket.on('increase-timer', (data) => {
+      increaseGameTimer(data);
+    });
+
     socket.on('disconnect', () => {
       EmitEventOnDisconnect(io, socket);
     });
@@ -96,8 +104,6 @@ function joinGame(io, socket, data, callback) {
       socket: socket.id,
       score: 0
     });
-
-    console.log("players: ", gameData.players);
 
     const newGameData = JSON.parse(JSON.stringify(gameData));
     delete newGameData.gameSettings.questions;
@@ -228,31 +234,52 @@ function startGame(io, gameid) {
       return;
 
     io.to(game.gameid.toString()).emit('creator-start-game');
+    startGameTimer(io, game.gameid);
+
   } catch (error) {
     console.error(error);
   }
 }
 
-function startGameTimer(gameId) {
-  const game = games.find(game => game.gameId === gameId);
+function startGameTimer(io, gameId) {
+  const game = findGameById(gameId);
 
-  if (!game) return;
+  if (!game)
+    return;
 
-  let timeRemaining = game?.gameSettings.time;
+  if (game.timer) {
+    clearInterval(game.timer);
+    game.timer = null;
+  }
+
+  console.log('Starting game timer');
 
   // Save the interval in the game object so we can clear it later if needed
   game.timer = setInterval(() => {
-    timeRemaining--;
 
-    // Emit the remaining time to all clients in the room
-    io.to(gameId).emit('timer-update', { timeRemaining });
+    game.gameSettings.time--;
 
-    // If time is up, clear the interval and emit time-up event
-    if (timeRemaining <= 0) {
+    io.to(gameId).emit('timer-update', {
+      timeRemaining: game.gameSettings.time
+    });
+
+    if (game.gameSettings.time <= 0) {
       clearInterval(game.timer);
-      io.to(gameId).emit('time-up');
+      io.to(gameId).emit('timer-update', {
+        timeRemaining: null
+      });
     }
-  }, timeRemaining * 1000); // Update every second
+  }, 1000); // Update every second
+}
+
+function increaseGameTimer(data) {
+  const { gameid } = data;
+  const game = findGameById(gameid);
+
+  if (!game)
+    return;
+
+  game.gameSettings.time += 10;
 }
 
 function getCurrentGameQuestion(gameid, qid) {
@@ -297,6 +324,12 @@ function emitGameQuestion(io, gameid, increment = QuestionAction.MAINTAIN, callb
     // Emit the question to all clients in the game room
     io.to(gameid).emit('new-question', { server: currentQuestion });
 
+    // reset game timer
+    startGameTimer(io, gameid);
+
+    // clear game hints
+    game.hintIndex = [];
+
     // Callback to the creator if needed
     if (callback)
       callback({ server: currentQuestion });
@@ -322,6 +355,40 @@ function onPlayerAnswer(io, socket, data) {
     player.answers.push({ question: currentQuestion.question, answer: response });
 
     io.to(game.gameid.toString()).emit('player-answered', { socketId: socket.id });
+  }
+  catch (error) {
+    console.error(error);
+  }
+}
+
+function handleQuestionHint(io, data) {
+
+  try {
+    const { gameid } = data;
+    const game = findGameById(gameid);
+
+    if (!game)
+      return;
+
+    game.hintIndex = game.hintIndex || [];
+
+    if (game.hintIndex.length >= 3)
+      return;
+
+    const randomIndex = Math.floor(Math.random() * 4);
+
+    // check if the hint has already been used
+    const alreadyHinted = game.hintIndex?.filter((index) => index === randomIndex);
+
+    while (alreadyHinted.length > 0)
+      randomIndex = Math.floor(Math.random() * 4);
+
+    // add the hint index to the game object
+    game.hintIndex.push(randomIndex);
+
+    io.to(game.gameid.toString()).emit("client-question-hint", {
+      hints: game.hintIndex
+    });
   }
   catch (error) {
     console.error(error);

@@ -11,6 +11,7 @@ export default function Game() {
 
   const [gameQuestion, setGameQuestion] = useState(null);
   const [gameOptions, setGameOptions] = useState([]);
+  const [gameTimer, setGameTimer] = useState(null);
 
   const socket = useContext(SocketContext);
 
@@ -51,8 +52,13 @@ export default function Game() {
       setGameOptions(options);
     });
 
+    socket.on("timer-update", (data) => {
+      setGameTimer(data.timeRemaining ?? "--");
+    });
+
     return () => {
       socket.off("new-question");
+      socket.off("timer-update");
     };
   }, []);
 
@@ -64,9 +70,14 @@ export default function Game() {
     <CreatorScreen
       question={gameQuestion}
       options={gameOptions}
+      timer={gameTimer}
       handleNextQuestion={fetchNextQuestion}
     />
   ) : (
-    <PlayerScreen question={gameQuestion} options={gameOptions} />
+    <PlayerScreen
+      question={gameQuestion}
+      options={gameOptions}
+      timer={gameTimer}
+    />
   );
 }
