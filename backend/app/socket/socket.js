@@ -55,7 +55,7 @@ module.exports = (io) => {
     });
 
     socket.on('increase-timer', (data) => {
-      increaseGameTimer(data);
+      increaseGameTimer(io, data);
     });
 
     socket.on('disconnect', () => {
@@ -98,6 +98,11 @@ function joinGame(io, socket, data, callback) {
     }
     // Add the player to the game
     addPlayerToGame(username, socket, gameData);
+
+    //send player to queue page if there is active question
+    if (gameData.currentQuestionIndex && gameTimer[gameData.gameid] !== null || gameData.currentQuestionIndex <= gameData.gameSettings.questions.length) {
+
+    }
 
     io.to(gameData.gameid.toString()).emit('player-join', {
       username,
@@ -249,21 +254,19 @@ function startGameTimer(io, gameId) {
 
   if (game.timer) {
     clearInterval(game.timer);
-    game.timer = null;
+    gameTimer[gameId] = null;
   }
 
-  console.log('Starting game timer');
+  gameTimer[gameId] = game.gameSettings.time;
 
   // Save the interval in the game object so we can clear it later if needed
   game.timer = setInterval(() => {
 
-    game.gameSettings.time--;
+    gameTimer[gameId]--;
 
-    io.to(gameId).emit('timer-update', {
-      timeRemaining: game.gameSettings.time
-    });
+    sendTimerToServer(io, gameId, gameTimer[gameId]);
 
-    if (game.gameSettings.time <= 0) {
+    if (gameTimer[gameId] <= 0) {
       clearInterval(game.timer);
       io.to(gameId).emit('timer-update', {
         timeRemaining: null
@@ -272,15 +275,20 @@ function startGameTimer(io, gameId) {
   }, 1000); // Update every second
 }
 
-function increaseGameTimer(data) {
+function increaseGameTimer(io, data) {
   const { gameid } = data;
-  const game = findGameById(gameid);
 
-  if (!game)
-    return;
+  gameTimer[gameid] += 10;
 
-  game.gameSettings.time += 10;
+  sendTimerToServer(io, gameid, gameTimer[gameid]);
+
 }
+
+function sendTimerToServer(io, gameid, timer) {
+  io.to(gameid).emit('timer-update', {
+    timeRemaining: timer
+  });
+};
 
 function getCurrentGameQuestion(gameid, qid) {
 

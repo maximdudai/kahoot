@@ -24,7 +24,7 @@ export default function Home() {
       }
 
       socket?.emit("join-game", { gameCode, username }, (response) => {
-        if (response?.success == false) {
+        if (!response?.success) {
           alert("Game not found");
           return;
         }
