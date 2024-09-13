@@ -5,6 +5,7 @@ class Player {
     this.gameid = gameid;
     this.answers = [];
     this.score = 0;
+    this.inQueue = false;
   }
 }
 

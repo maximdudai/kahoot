@@ -24,7 +24,7 @@ export default function Home() {
       }
 
       socket?.emit("join-game", { gameCode, username }, (response) => {
-        if (!response?.success) {
+        if (response?.success === false) {
           alert("Game not found");
           return;
         }
@@ -33,6 +33,10 @@ export default function Home() {
         localStorage.setItem("socket", socket.id);
         localStorage.setItem("game", JSON.stringify(response?.gameData));
 
+        if(response?.inQueue) {
+          router.push("/queue", undefined, { shallow: true });
+          return;
+        }
         router.push("/waiting", undefined, { shallow: true });
       });
     } catch (e) {

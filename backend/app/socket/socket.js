@@ -2,6 +2,7 @@ const Player = require('../player/player');
 
 let games = [];
 let gameTimer = [];
+let gameInterval = [];
 
 const QuestionAction = {
   INCREMENT: 'increment',
@@ -72,8 +73,12 @@ function createGame(gameSettings, socket, callback) {
       gameid: socket.id,
       players: [],
       currentQuestionIndex: 0,
+      playersInQueue: [],
     };
     games.push(game);
+
+    gameTimer[game.gameid] = null;
+    gameInterval[game.gameid] = null;
 
     // Emit the create-game event to the creator
     callback({ gameData: game });
@@ -99,11 +104,6 @@ function joinGame(io, socket, data, callback) {
     // Add the player to the game
     addPlayerToGame(username, socket, gameData);
 
-    //send player to queue page if there is active question
-    if (gameData.currentQuestionIndex && gameTimer[gameData.gameid] !== null || gameData.currentQuestionIndex <= gameData.gameSettings.questions.length) {
-
-    }
-
     io.to(gameData.gameid.toString()).emit('player-join', {
       username,
       socket: socket.id,
@@ -113,7 +113,7 @@ function joinGame(io, socket, data, callback) {
     const newGameData = JSON.parse(JSON.stringify(gameData));
     delete newGameData.gameSettings.questions;
 
-    callback({ gameData: newGameData });
+    callback({ gameData: newGameData, inQueue: gameTimer[gameData.gameid] !== null });
 
   } catch (error) {
     console.error(error);
@@ -180,6 +180,12 @@ function addPlayerToGame(username, socket, game) {
   try {
     const newPlayer = new Player(username, socket.id, game.gameid);
     game?.players.push(newPlayer);
+
+    // Add the player to the queue if the game has already started
+    if (gameTimer[game.gameid] !== null && game.currentQuestionIndex > 0) {
+      newPlayer.inQueue = true;
+      game.playersInQueue.push(newPlayer);
+    }
 
     socket.join(game.gameid.toString());
   }
@@ -252,22 +258,22 @@ function startGameTimer(io, gameId) {
   if (!game)
     return;
 
-  if (game.timer) {
-    clearInterval(game.timer);
+  if (gameInterval[gameId]) {
+    clearInterval(gameInterval[gameId]);
     gameTimer[gameId] = null;
   }
 
   gameTimer[gameId] = game.gameSettings.time;
 
   // Save the interval in the game object so we can clear it later if needed
-  game.timer = setInterval(() => {
+  gameInterval[gameId] = setInterval(() => {
 
     gameTimer[gameId]--;
 
     sendTimerToServer(io, gameId, gameTimer[gameId]);
 
     if (gameTimer[gameId] <= 0) {
-      clearInterval(game.timer);
+      clearInterval(gameInterval[gameId]);
       io.to(gameId).emit('timer-update', {
         timeRemaining: null
       });
@@ -309,7 +315,6 @@ function emitGameQuestion(io, gameid, increment = QuestionAction.MAINTAIN, callb
     if (!game)
       return;
 
-
     // prevent incrementing the question index if the game is over
     switch (increment) {
       case QuestionAction.INCREMENT:
@@ -329,6 +334,9 @@ function emitGameQuestion(io, gameid, increment = QuestionAction.MAINTAIN, callb
 
     const currentQuestion = getCurrentGameQuestion(gameid, game.currentQuestionIndex);
 
+    // check if there is somene in game queue
+    checkGameQueue(io, gameid);
+
     // Emit the question to all clients in the game room
     io.to(gameid).emit('new-question', { server: currentQuestion });
 
@@ -347,6 +355,31 @@ function emitGameQuestion(io, gameid, increment = QuestionAction.MAINTAIN, callb
   }
 }
 
+function checkGameQueue(io, gameId) {
+  const game = findGameById(gameId);
+
+  if (!game)
+    return;
+
+  if (!game.playersInQueue.length)
+    return;
+
+  console.log('Checking game queue');
+  console.log('players inqueue: ', game.playersInQueue);
+
+  // Add queued players to the game
+  for (const player of game.playersInQueue) {
+    io.to(game.gameid.toString()).emit('player-join-queue', {
+      username: player.username,
+      socket: player.socket,
+      score: player.score
+    });
+  }
+
+  // Clear the queue
+  game.playersInQueue = [];
+}
+
 
 function onPlayerAnswer(io, socket, data) {
   try {
@@ -354,6 +387,9 @@ function onPlayerAnswer(io, socket, data) {
     const game = findGameById(gameid);
 
     if (!game)
+      return;
+
+    if(gameTimer[gameid] === null)
       return;
 
     const player = findPlayerBySocketId(game, socket.id);
