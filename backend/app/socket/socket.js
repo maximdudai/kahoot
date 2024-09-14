@@ -182,7 +182,7 @@ function addPlayerToGame(username, socket, game) {
     game?.players.push(newPlayer);
 
     // Add the player to the queue if the game has already started
-    if (gameTimer[game.gameid] !== null && game.currentQuestionIndex > 0) {
+    if (gameTimer[game.gameid] !== null && game.currentQuestionIndex >= 0) {
       newPlayer.inQueue = true;
       game.playersInQueue.push(newPlayer);
     }
@@ -278,7 +278,7 @@ function startGameTimer(io, gameId) {
         timeRemaining: null
       });
     }
-  }, 1000); // Update every second
+  }, 1000);
 }
 
 function increaseGameTimer(io, data) {
@@ -364,17 +364,8 @@ function checkGameQueue(io, gameId) {
   if (!game.playersInQueue.length)
     return;
 
-  console.log('Checking game queue');
-  console.log('players inqueue: ', game.playersInQueue);
-
   // Add queued players to the game
-  for (const player of game.playersInQueue) {
-    io.to(game.gameid.toString()).emit('player-join-queue', {
-      username: player.username,
-      socket: player.socket,
-      score: player.score
-    });
-  }
+  io.to(game.gameid.toString()).emit('player-join-queue');
 
   // Clear the queue
   game.playersInQueue = [];

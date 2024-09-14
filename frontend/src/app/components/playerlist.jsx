@@ -20,7 +20,7 @@ export const Playerlist = () => {
   return (
     playerList && (
       <ul
-        className={`flex justify-center flex-wrap w-full gap-2 text-white max-h-80 pb-4 ${
+        className={`flex justify-center flex-wrap w-full gap-2 text-white max-h-80 my-5 pb-3 ${
           playerList.length ? "border-b-[1px] border-gray-300/30" : ""
         }`}
         style={{
@@ -42,10 +42,6 @@ export const Playerlist = () => {
           >
             <FaRegUserCircle className="text-2xl" />
             <span>{player.username}</span>
-            {/* {player.username}
-          {player.asnwered && (
-            <span>{player.answer ? " - Answered" : " - Waiting"}</span>
-          )} */}
           </li>
         ))}
       </ul>

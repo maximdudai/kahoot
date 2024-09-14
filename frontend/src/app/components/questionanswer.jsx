@@ -54,13 +54,13 @@ export const QuestionAnswer = ({ question, options, disabled = false }) => {
   };
 
   return (
-    <div className="questionData mt-10 w-full flex justify-center items-center flex-col">
+    <div className="questionData mt-10 p-2 md:p-0 w-full flex justify-center items-center flex-col">
       <div className="bg-green-500 p-2 border-b-[1px] border-t-[1px] border-gray-300/20 w-full my-3">
         <p className="text-2xl text-center">{question}</p>
       </div>
 
       <div className="options w-full">
-        <ul className="w-full grid grid-cols-1 md:grid-cols-2 p-2 gap-2">
+        <ul className="w-full grid grid-cols-1 md:grid-cols-2 gap-2">
           {getUpdatedOptionsWithHints()?.map((option, index) => (
             <li
               key={index}

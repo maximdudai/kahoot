@@ -93,7 +93,7 @@ export default function SocketProvider({ children }) {
       const isCreator = isGameCreator(socket?.id);
       if (!isCreator) return;
       
-      socket?.emit("server-cancel-game");
+      // socket?.emit("server-cancel-game");
     }, [socket])
   );
 

@@ -45,7 +45,7 @@ export default function Home() {
   };
 
   return (
-    <div className="text-black w-full md:w-1/2 lg:w-1/3 p-2 flex flex-col gap-3  justify-center rounded-md">
+    <div className="text-black w-full md:w-1/2 lg:w-1/3 p-2 flex flex-col gap-3 justify-center rounded-md">
       <Kahoot />
       <div className="authUsername font-bold text-xl p-2 flex items-center justify-between border-8 border-green-500 rounded-full">
         <input

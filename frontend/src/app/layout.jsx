@@ -17,22 +17,23 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <SocketProvider>
-          <div className="bgImage">
-            <div className="bgEffect"></div>
-          </div>
-          <main className="w-screen min-h-screen flex items-center justify-center p-2">
-            {children}
-          </main>
+          <div className="flex flex-col justify-between min-h-screen">
+            <div className="bgImage h-screen">
+              <div className="bgEffect"></div>
+            </div>
+            <main className="w-screen h-full flex items-center justify-center">
+              {children}
+            </main>
 
-          <footer className="absolute bottom-2 right-2">
-            <Link
-              target="_blank"
-              href="https://github.com/maximdudai/kahoot"
-              className="text-white"
-            >
-              <FaGithub className="w-10 h-10" />
-            </Link>
-          </footer>
+            <footer className="text-white flex flex-row-reverse items-center gap-3 p-2">
+              <Link target="_blank" href="https://github.com/maximdudai/kahoot">
+                <FaGithub className="w-10 h-10" />
+              </Link>
+              <p className="uppercase text-sm italic font-semibold">
+                Feel free to contribute
+              </p>
+            </footer>
+          </div>
         </SocketProvider>
       </body>
     </html>

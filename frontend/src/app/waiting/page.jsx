@@ -30,6 +30,7 @@ export default function WaitingPlayers() {
 
     router.push("/game", undefined, { shallow: true });
   };
+
   return (
     <>
       <div className="container p-2 flex flex-col items-center justify-center rounded-md">

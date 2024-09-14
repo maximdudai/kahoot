@@ -5,6 +5,7 @@ import { SocketContext } from "@/app/context/socket";
 import { CreatorScreen } from "./components/creator";
 import { PlayerScreen } from "./components/player";
 import { QuestionAction } from "../utils/question";
+import { LeaveGame } from "../components/leavegame";
 
 export default function Game() {
   const [isCreator, setIsCreator] = useState(null);
@@ -66,7 +67,7 @@ export default function Game() {
     return <div>Loading...</div>;
   }
 
-  return isCreator ? (
+  return !isCreator ? (
     <CreatorScreen
       question={gameQuestion}
       options={gameOptions}

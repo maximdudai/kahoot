@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState, useRef, useContext } from "react";
 import { useRouter } from "next/navigation";
@@ -54,6 +54,11 @@ export default function CreateNewGame() {
       return;
     }
 
+    if (!gameCode.length) {
+      alert("Please generate a game code.");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("file", gameFile);
 
@@ -82,7 +87,6 @@ export default function CreateNewGame() {
 
         //redirect to waiting page
         router.push("/waiting", undefined, { shallow: true });
-        
       } else {
         alert(response.data.message);
       }
