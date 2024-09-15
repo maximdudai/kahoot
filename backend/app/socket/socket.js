@@ -14,9 +14,6 @@ const QuestionAction = {
 module.exports = (io) => {
   io.on('connection', (socket) => {
 
-    // current time
-    let time = new Date().toLocaleTimeString();
-
     // requested events
     socket.onAny((event, ...args) => {
       console.log(event, args);

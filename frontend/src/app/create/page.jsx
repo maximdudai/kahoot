@@ -63,6 +63,8 @@ export default function CreateNewGame() {
     formData.append("file", gameFile);
 
     try {
+      console.log('requesto to', process.env.SOCKET_URL + "/upload");
+
       const response = await axios.post(
         // "http://192.168.1.180:5050/upload",
         process.env.SOCKET_URL + "/upload",
