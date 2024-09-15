@@ -64,7 +64,8 @@ export default function CreateNewGame() {
 
     try {
       const response = await axios.post(
-        "http://192.168.1.180:5050/upload",
+        // "http://192.168.1.180:5050/upload",
+        process.env.SOCKET_URL + "/upload",
         formData,
         {
           headers: {

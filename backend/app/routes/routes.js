@@ -28,4 +28,8 @@ router.post('/', upload.single('file'), (req, res) => {
   }
 });
 
+router.post('/hello', (req, res) => {
+  res.json({ message: 'Hello, World!' });
+});
+
 module.exports = router;

@@ -14,7 +14,7 @@ export default function SocketProvider({ children }) {
   const router = useRouter();
 
   useEffect(() => {
-    const newSocket = io("http://192.168.1.180:5050");
+    const newSocket = io(process.env.SOCKET_URL);
     setSocket(newSocket);
 
     return () => {
