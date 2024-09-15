@@ -18,8 +18,13 @@ const io = new Server(server, {
   },
 });
 
+// app.use(cors({
+//   origin: `${process.env.SERVER_IP}:${process.env.SERVER_PORT}`,
+//   methods: ['GET', 'POST'],
+// }));
+
 app.use(cors({
-  origin: `${process.env.SERVER_IP}:${process.env.SERVER_PORT}`,
+  origin: '*',
   methods: ['GET', 'POST'],
 }));
 
