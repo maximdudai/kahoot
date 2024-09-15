@@ -1,41 +1,45 @@
 const express = require('express');
-const http = require('http');
-const cors = require('cors');
+const https = require('https');
 const fs = require('fs');
+const cors = require('cors');
 const socketIo = require('socket.io');
 const socketHandler = require('./app/socket/socket');
-require('dotenv').config();
-const app = express();
-const uploadRoutes = require('./app/routes/routes');
 
+const app = express();
+
+// Read the self-signed certificate and private key
+const privateKey = fs.readFileSync('/etc/ssl/private/selfsigned.key', 'utf8');
+const certificate = fs.readFileSync('/etc/ssl/certs/selfsigned.crt', 'utf8');
+
+const credentials = { key: privateKey, cert: certificate };
 
 // Create HTTPS server
-const server = http.createServer(app);
+const server = https.createServer(credentials, app);
 
-// Create WebSocket server with HTTPS
+// WebSocket setup
 const io = socketIo(server, {
   cors: {
-      origin: 'https://kahoot-nine.vercel.app', // Replace with your frontend domain
-      methods: ['GET', 'POST'],
-      credentials: true
+    origin: ['https://kahoot-nine.vercel.app'], // Allow your frontend
+    methods: ['GET', 'POST'],
+    credentials: true
   }
 });
 
 app.use(cors({
-  origin: 'https://kahoot-nine.vercel.app',
+  origin: ['https://kahoot-nine.vercel.app'],
   methods: ['GET', 'POST'],
 }));
 
-// Set up WebSocket event handlers
+// Your WebSocket event handlers
 socketHandler(io);
 
-// Set the port
-const PORT = process.env.PORT || 3000;
+// Set the port for HTTPS
+const PORT = 443; // Standard HTTPS port
 
-// Start the HTTPS server
+// Start HTTPS server
 server.listen(PORT, () => {
-  console.log(`Server is running on https://localhost:${PORT}`);
+  console.log(`HTTPS Server is running on https://51.178.18.74:${PORT}`);
 });
 
-// Use your routes
+// Your other routes (e.g., /upload)
 app.use('/upload', uploadRoutes);
