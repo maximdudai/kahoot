@@ -43,3 +43,6 @@ server.listen(PORT, () => {
 
 // Your other routes (e.g., /upload)
 app.use('/upload', uploadRoutes);
+app.get('/', function (req, res) {
+  res.send('Hello World')
+})
