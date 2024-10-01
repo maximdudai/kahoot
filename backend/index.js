@@ -17,12 +17,15 @@ const credentials = { key: privateKey, cert: certificate };
 const server = https.createServer(credentials, app);
 
 // WebSocket setup
-const io = socketIo(server, {
+const io = require('socket.io')(server, {
   cors: {
-    origin: "https://kahoot-nine.vercel.app/", // Allow your frontend
-    methods: ['GET', 'POST'],
+    origin: "https://kahoot-nine.vercel.app",
+    methods: ["GET", "POST"],
+    credentials: true,
+    allowedHeaders: ["Access-Control-Allow-Headers", "Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"],
   }
 });
+
 
 app.use(cors({
   origin: "https://kahoot-nine.vercel.app/",
