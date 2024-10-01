@@ -19,14 +19,13 @@ const server = https.createServer(credentials, app);
 // WebSocket setup
 const io = socketIo(server, {
   cors: {
-    origin: ['https://kahoot-nine.vercel.app', 'http://192.168.1.200:3000'], // Allow your frontend
+    origin: "https://kahoot-nine.vercel.app/", // Allow your frontend
     methods: ['GET', 'POST'],
-    credentials: true
   }
 });
 
 app.use(cors({
-  origin: ['https://kahoot-nine.vercel.app', 'http://192.168.1.200:3000'],
+  origin: "https://kahoot-nine.vercel.app/",
   methods: ['GET', 'POST'],
 }));
 
@@ -38,7 +37,7 @@ const PORT = 3000; // Standard HTTPS port
 
 // Start HTTPS server
 server.listen(PORT, () => {
-  console.log(`HTTPS Server is running on https://51.178.18.74:${PORT}`);
+  console.log(`HTTPS Server is running on http://192.168.1.200:${PORT}`);
 });
 
 // Your other routes (e.g., /upload)
