@@ -1,11 +1,7 @@
 // routes/uploadRoutes.js
-const express = require('express');
-const multer = require('multer');
-const router = express.Router();
 
-const upload = multer({ storage: multer.memoryStorage() });
 
-router.post('/', upload.single('file'), (req, res) => {
+function uploadData(req, res) {
   const file = req.file;
 
   if (!file) {
@@ -26,10 +22,6 @@ router.post('/', upload.single('file'), (req, res) => {
   } catch (err) {
     res.status(400).json({ success: false, message: 'Invalid JSON file.' });
   }
-});
+}
 
-router.post('/hello', (req, res) => {
-  res.json({ message: 'Hello, World!' });
-});
-
-module.exports = router;
+module.exports = uploadData;

@@ -6,9 +6,8 @@ const cors = require('cors');
 const socketIo = require('socket.io');
 const socketHandler = require('./app/socket/socket');
 const app = express();
-
-const uploadRoutes = require('./app/routes/routes');
-
+const multer = require('multer');
+const uploadData = require('./app/routes/routes');
 // Read the self-signed certificate and private key
 // const privateKey = fs.readFileSync('/etc/ssl/private/selfsigned.key', 'utf8');
 // const certificate = fs.readFileSync('/etc/ssl/certs/selfsigned.crt', 'utf8');
@@ -28,16 +27,11 @@ const io = require('socket.io')(server, {
 });
 
 
-app.use(cors({
-  origin: ["https://76.76.21.142", "https://kahoot-nine.vercel.app/"],
-  methods: ['GET', 'POST'],
-}));
-
 // Your WebSocket event handlers
 socketHandler(io);
 
 // Set the port for HTTPS
-const PORT = 80; // Standard HTTPS port
+const PORT = 8080; // Standard HTTPS port
 
 // Start HTTPS server
 server.listen(PORT, () => {
@@ -45,7 +39,9 @@ server.listen(PORT, () => {
 });
 
 // Your other routes (e.g., /upload)
-app.use('/upload', uploadRoutes);
+const upload = multer({ storage: multer.memoryStorage() });
+
+app.post('/upload', upload.single('file'), uploadData);
 app.get('/', function (req, res) {
   res.send('Hello World')
 })
