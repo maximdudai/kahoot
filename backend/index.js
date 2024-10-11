@@ -19,7 +19,7 @@ const server = http.createServer(app);
 // WebSocket setup
 const io = require('socket.io')(server, {
   cors: {
-    origin: ["https://76.76.21.142", "https://kahoot-nine.vercel.app/"],
+    origin: ["https:www.kahoot.pro", "https://kahoot.pro"],
     methods: ["GET", "POST"],
     credentials: true,
     allowedHeaders: ["Access-Control-Allow-Headers", "Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"],
@@ -31,7 +31,7 @@ const io = require('socket.io')(server, {
 socketHandler(io);
 
 // Set the port for HTTPS
-const PORT = 8080; // Standard HTTPS port
+const PORT = 80; // Standard HTTPS port
 
 // Start HTTPS server
 server.listen(PORT, () => {
