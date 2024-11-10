@@ -40,7 +40,7 @@ export const getCorrectPercentage = (player) => {
     // When someone join when the game is already started
     // the previous answers are undefined
     if(qData.answer !== undefined)
-      return qData.answer === qData.correct_answer;
+      return qData.answer === qData.correctAnswer;
   });
   const percentage = (correctAnswers.length / player.answers.length) * 100;
 
@@ -52,7 +52,7 @@ export const getCorrectAnswers = (player) => {
     // When someone join when the game is already started
     // the previous answers are undefined
     if(qData.answer !== undefined)
-      return qData.answer === qData.correct_answer;
+      return qData.answer === qData.correctAnswer;
   });
 
   return `${correctAnswers.length}/${player.answers.length}`;

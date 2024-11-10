@@ -28,18 +28,19 @@ export default function Results() {
   useEffect(() => {
     if (socket && gameData) {
       socket.emit("get-results", gameData.gameid, (response) => {
-        console.table(response.playerList);
-
         const playerListWithPercentage = () =>
-          response.playerList.map((player) => {
-            return {
-              ...player,
-              correctAnswers: getCorrectAnswers(player),
-              correctAnswersByPercentage: getCorrectPercentage(player),
-            };
-          });
+			response.playerList.map((player) => {
+			return {
+				...player,
+				correctAnswers: getCorrectAnswers(player),
+				correctAnswersByPercentage: getCorrectPercentage(player),
+			};
+		});
 
-        setPlayerList(playerListWithPercentage);
+		const sortedPlayerList = playerListWithPercentage().sort((a, b) => 
+			b.correctAnswersByPercentage - a.correctAnswersByPercentage);
+
+        setPlayerList(sortedPlayerList);
       });
 
       return () => {
@@ -70,10 +71,10 @@ export default function Results() {
             >
               <div className="flex justify-between text-lg">
                 <li>{player.username}</li>
-                <li>{player.score}</li>
+                <li>{player.correctAnswers}</li>
               </div>
               <div className="progressBar mt-2">
-                <ProgressBar percentage={player.correctAnswers} />
+                <ProgressBar percentage={player.correctAnswersByPercentage} />
               </div>
             </ul>
           ))}
