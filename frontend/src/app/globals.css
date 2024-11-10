@@ -34,13 +34,13 @@ html, body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  height: 100%;
 }
 
 .bgImage {
   position: absolute;
   inset: 0;
   z-index: -10;
-
   background-image: url('../../assets/kahootbg.png');
   background-size: cover;
   background-repeat: no-repeat;
@@ -54,11 +54,16 @@ html, body {
   inset: 0;
   z-index: -4;
   filter: brightness(0.4);
-    /* From https://css.glass */
   background: rgba(255, 255, 255, 0);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
+}
+/* Media query for mobile screens */
+@media (max-width: 768px) {
+  .bgImage {
+    background-attachment: scroll;
+  }
 }
 
 @layer utilities {

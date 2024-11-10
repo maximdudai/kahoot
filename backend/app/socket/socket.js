@@ -44,6 +44,10 @@ module.exports = (io) => {
       emitGameQuestion(io, gameid, increment, callback);
     });
 
+    socket.on('get-results', (gameid, callback) => {
+      emitEndGame(gameid, callback);
+    });
+
     socket.on('player-answer', (data) => {
       onPlayerAnswer(io, socket, data);
     });
@@ -176,7 +180,7 @@ function cancelGame(io, gameid) {
 function addPlayerToGame(username, socket, game) {
   try {
     const newPlayer = new Player(username, socket.id, game.gameid);
-    game?.players.push(newPlayer);
+    game.players.push(newPlayer);
 
     // Add the player to the queue if the game has already started
     if (gameTimer[game.gameid] !== null && game.currentQuestionIndex >= 0) {
@@ -312,6 +316,11 @@ function emitGameQuestion(io, gameid, increment = QuestionAction.MAINTAIN, callb
     if (!game)
       return;
 
+    if (game.currentQuestionIndex >= game.gameSettings.questions.length - 1) {
+      io.to(game.gameid.toString()).emit('end-game');
+      return;
+    }
+
     // prevent incrementing the question index if the game is over
     switch (increment) {
       case QuestionAction.INCREMENT:
@@ -352,6 +361,16 @@ function emitGameQuestion(io, gameid, increment = QuestionAction.MAINTAIN, callb
   }
 }
 
+function emitEndGame(gameid, callback) {
+  const game = findGameById(gameid);
+
+  if (!game)
+    return;
+  
+  callback({ playerList: game.players });
+  return;
+}
+
 function checkGameQueue(io, gameId) {
   const game = findGameById(gameId);
 
@@ -377,14 +396,17 @@ function onPlayerAnswer(io, socket, data) {
     if (!game)
       return;
 
-    if(gameTimer[gameid] === null)
+    if (gameTimer[gameid] === null)
       return;
 
     const player = findPlayerBySocketId(game, socket.id);
     const currentQuestion = game?.gameSettings.questions[game.currentQuestionIndex];
 
     //update player answer on current question
-    player.answers.push({ question: currentQuestion.question, answer: response });
+    player.answers[game.currentQuestionIndex] = {
+      answer: response,
+      correctAnswer: currentQuestion.correct_option_index
+    };
 
     io.to(game.gameid.toString()).emit('player-answered', { socketId: socket.id });
   }
@@ -425,12 +447,4 @@ function handleQuestionHint(io, data) {
   catch (error) {
     console.error(error);
   }
-}
-
-function getMemberCorrectPercentage(game, member) {
-  const correctAnswers = member.answers.filter(
-    (answer) => answer.answer === game.gameSettings.questions[member.answers.indexOf(answer)].correctAnswer
-  );
-
-  return (correctAnswers.length / game.gameSettings.questions.length) * 100;
 }

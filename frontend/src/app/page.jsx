@@ -13,11 +13,15 @@ export default function Home() {
   const [username, setUsername] = useState("");
   const [gameCode, setGameCode] = useState("");
   const router = useRouter();
-
+  const [sendedRequest, setSendedRequest] = useState(false);
   const socket = useContext(SocketContext);
 
   const handleJoinGame = () => {
     try {
+      // Prevent multiple requests
+      if(sendedRequest) 
+        return;
+
       if (username === "" || gameCode === "") {
         alert("Please fill in all fields.");
         return;
@@ -40,6 +44,7 @@ export default function Home() {
         router.push("/waiting", undefined, { shallow: true });
       });
     } catch (e) {
+      setSendedRequest(false);
       console.error(e);
     }
   };
@@ -75,6 +80,7 @@ export default function Home() {
       <div className="gameButtons flex flex-col md:flex-row justify-center gap-4 cursor-pointer">
         <button
           className="bg-emerald-500 w-full lg:w-1/3 uppercase tracking-widest font-bold text-white p-2 rounded-md hover:scale-110 transform transition-all"
+          disabled={sendedRequest}
           onClick={handleJoinGame}
         >
           Join

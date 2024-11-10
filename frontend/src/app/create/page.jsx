@@ -22,6 +22,8 @@ export default function CreateNewGame() {
     time: 30,
     gameCode: "",
   });
+  const [sendedRequest, setSendedRequest] = useState(false);
+
   const socket = useContext(SocketContext);
   const router = useRouter();
 
@@ -49,6 +51,10 @@ export default function CreateNewGame() {
   };
 
   const handleCreateGame = async () => {
+    // prevent multiple requests
+    if(sendedRequest) 
+      return;
+
     if (!gameFile) {
       alert("Please upload a file.");
       return;
@@ -59,12 +65,12 @@ export default function CreateNewGame() {
       return;
     }
 
+    setSendedRequest(true);
+
     const formData = new FormData();
     formData.append("file", gameFile);
 
     try {
-      console.log('requesto to', process.env.SOCKET_URL + "/upload");
-
       const response = await axios.post(
         // "http://192.168.1.180:5050/upload",
         process.env.SOCKET_URL + "/upload",
@@ -91,6 +97,7 @@ export default function CreateNewGame() {
         //redirect to waiting page
         router.push("/waiting", undefined, { shallow: true });
       } else {
+        setSendedRequest(false);
         alert(response.data.message);
       }
     } catch (error) {
@@ -305,6 +312,7 @@ export default function CreateNewGame() {
         <div className="createGame">
           <button
             className="bg-green-500 w-full p-2 rounded-md text-white tracking-wider uppercase"
+            disabled={sendedRequest}
             onClick={handleCreateGame}
           >
             Create Game

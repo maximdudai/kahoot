@@ -16,13 +16,28 @@ const uploadData = require('./app/routes/routes');
 // Create HTTPS server
 const server = http.createServer(app);
 
-// WebSocket setup
+app.use(cors({
+  origin: 'http://192.168.1.200:3000',
+  methods: ['GET', 'POST'],
+  credentials: true
+}));
+
+// // WebSocket setup
+// const io = require('socket.io')(server, {
+//   cors: {
+//     origin: ["https:www.kahoot.pro", "https://kahoot.pro", "http://192.168.1.200:3000"],
+//     methods: ["GET", "POST"],
+//     credentials: true,
+//     allowedHeaders: ["Access-Control-Allow-Headers", "Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"],
+//   }
+// });
+
+
 const io = require('socket.io')(server, {
   cors: {
-    origin: ["https:www.kahoot.pro", "https://kahoot.pro"],
+    origin: ["http://192.168.1.200:3000"],
     methods: ["GET", "POST"],
-    credentials: true,
-    allowedHeaders: ["Access-Control-Allow-Headers", "Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"],
+    credentials: true
   }
 });
 

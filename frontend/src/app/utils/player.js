@@ -34,3 +34,26 @@ export const isGameCreator = (socket) => {
 
   return localGameData?.gameid === socket;
 }
+
+export const getCorrectPercentage = (player) => {
+  const correctAnswers = player.answers.filter((qData) => {
+    // When someone join when the game is already started
+    // the previous answers are undefined
+    if(qData.answer !== undefined)
+      return qData.answer === qData.correct_answer;
+  });
+  const percentage = (correctAnswers.length / player.answers.length) * 100;
+
+  return percentage.toFixed(2);
+};
+
+export const getCorrectAnswers = (player) => {
+  const correctAnswers = player.answers.filter((qData) => {
+    // When someone join when the game is already started
+    // the previous answers are undefined
+    if(qData.answer !== undefined)
+      return qData.answer === qData.correct_answer;
+  });
+
+  return `${correctAnswers.length}/${player.answers.length}`;
+}

@@ -1,0 +1,92 @@
+"use client";
+
+import { useContext, useEffect, useState } from "react";
+import { SocketContext } from "../context/socket";
+import {
+  getCorrectAnswers,
+  getCorrectPercentage,
+  isGameCreator,
+} from "../utils/player";
+import { Kahoot } from "../components/title";
+import { ProgressBar } from "../components/progressbar";
+
+export default function Results() {
+  const [playerList, setPlayerList] = useState([]);
+  const [gameData, setGameData] = useState(() => {
+    const savedGame = localStorage.getItem("game");
+    return savedGame ? JSON.parse(savedGame) : null;
+  });
+  const socket = useContext(SocketContext);
+  const isCreator = isGameCreator(socket.id);
+
+  useEffect(() => {
+    if (gameData) {
+      localStorage.setItem("game", JSON.stringify(gameData));
+    }
+  }, [gameData]);
+
+  useEffect(() => {
+    if (socket && gameData) {
+      socket.emit("get-results", gameData.gameid, (response) => {
+        console.table(response.playerList);
+
+        const playerListWithPercentage = () =>
+          response.playerList.map((player) => {
+            return {
+              ...player,
+              correctAnswers: getCorrectAnswers(player),
+              correctAnswersByPercentage: getCorrectPercentage(player),
+            };
+          });
+
+        setPlayerList(playerListWithPercentage);
+      });
+
+      return () => {
+        socket.off("get-results");
+      };
+    }
+  }, [socket, gameData]);
+
+  const handleEndGame = () => {
+    socket?.emit("server-cancel-game");
+  };
+
+  return (
+    <>
+      <div className="flex flex-col gap-2 text-white">
+        <Kahoot />
+        <div
+          className="h-96"
+          style={{
+            overflowY: "auto",
+            scrollbarColor: "rgba(255, 255, 255, 0.5) rgba(0, 0, 0, 0.5)",
+          }}
+        >
+          {playerList?.map((player, index) => (
+            <ul
+              key={index}
+              className="flex flex-col justify-center my-2 mr-2 bg-green-600/80 p-2 rounded-md"
+            >
+              <div className="flex justify-between text-lg">
+                <li>{player.username}</li>
+                <li>{player.score}</li>
+              </div>
+              <div className="progressBar mt-2">
+                <ProgressBar percentage={player.correctAnswers} />
+              </div>
+            </ul>
+          ))}
+          {isCreator && (
+            <button
+              onClick={handleEndGame}
+              className="bg-green-500 text-white p-2 rounded-md"
+            >
+              End Game
+            </button>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}

@@ -5,7 +5,7 @@ import { SocketContext } from "@/app/context/socket";
 import { CreatorScreen } from "./components/creator";
 import { PlayerScreen } from "./components/player";
 import { QuestionAction } from "../utils/question";
-import { LeaveGame } from "../components/leavegame";
+import { useRouter } from "next/navigation";
 
 export default function Game() {
   const [isCreator, setIsCreator] = useState(null);
@@ -13,8 +13,8 @@ export default function Game() {
   const [gameQuestion, setGameQuestion] = useState(null);
   const [gameOptions, setGameOptions] = useState([]);
   const [gameTimer, setGameTimer] = useState(null);
-
   const socket = useContext(SocketContext);
+  const router = useRouter();
 
   useEffect(() => {
     const gameData = JSON.parse(localStorage.getItem("game"));
@@ -57,9 +57,14 @@ export default function Game() {
       setGameTimer(data.timeRemaining ?? "--");
     });
 
+    socket.on("end-game", () => {
+      router.push("/results", undefined, { shallow: true });
+    });
+
     return () => {
       socket.off("new-question");
       socket.off("timer-update");
+      socket.off("end-game");
     };
   }, []);
 
@@ -67,7 +72,7 @@ export default function Game() {
     return <div>Loading...</div>;
   }
 
-  return !isCreator ? (
+  return isCreator ? (
     <CreatorScreen
       question={gameQuestion}
       options={gameOptions}

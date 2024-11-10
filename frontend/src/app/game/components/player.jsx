@@ -19,7 +19,7 @@ export const PlayerScreen = ({ question, options, timer }) => {
         />
       </div>
 
-      <LeaveGame className={'w-1/2'} />
+      <LeaveGame className={'md:w-1/2'} />
     </div>
   );
 };

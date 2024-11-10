@@ -67,7 +67,7 @@ export const CreatorScreen = ({ question, options, timer, handleNextQuestion }) 
   }
 
   return (
-    <div className="container h-1/2 bg-white/50 text-white flex flex-col">
+    <div className="container h-full bg-white/10 p-2 text-white flex flex-col">
       <div className="gameData w-full flex flex-col items-center md:flex-row md:justify-between md:items-end">
         <div className="timerCount py-5">
           <Timer timer={timer} />

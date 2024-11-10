@@ -1,6 +1,5 @@
 // routes/uploadRoutes.js
 
-
 function uploadData(req, res) {
   const file = req.file;
 
