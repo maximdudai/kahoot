@@ -1,4 +1,4 @@
-const Player = require('../player/player');
+import Player from '../player/player.js';
 
 let games = [];
 let gameTimer = [];
@@ -11,7 +11,7 @@ const QuestionAction = {
 };
 
 
-module.exports = (io) => {
+export default (io) => {
   io.on('connection', (socket) => {
 
     // requested events
@@ -90,18 +90,17 @@ function createGame(gameSettings, socket, callback) {
 }
 
 
-
 function joinGame(io, socket, data, callback) {
   try {
     const { gameCode, username } = data;
-
     const gameData = findGameByCode(gameCode);
 
-    // TODO: return an error if the game ID is not found
-    if (!gameData?.gameid) {
+    // Return an error if the game ID is not found
+    if (!(gameData && gameData.gameid)) {
       callback({ success: false });
       return;
     }
+
     // Add the player to the game
     addPlayerToGame(username, socket, gameData);
 
@@ -120,6 +119,7 @@ function joinGame(io, socket, data, callback) {
     console.error(error);
   }
 }
+
 
 function EmitEventOnDisconnect(io, socket) {
   try {
@@ -197,7 +197,7 @@ function addPlayerToGame(username, socket, game) {
 
 function findGameByCode(code) {
   try {
-    const game = games?.find((game) => game.gameSettings.gameCode === code);
+    const game = games ? games.find((game) => game.gameSettings.gameCode === code) : null;
 
     if (!game) {
       return null;
@@ -209,9 +209,11 @@ function findGameByCode(code) {
   }
 }
 
+
 function findGameById(id) {
   try {
-    const game = games?.find((game) => game.gameid === id);
+    const game = games ? games.find((game) => game.gameid === id) : null;
+
 
     if (!game)
       return null;

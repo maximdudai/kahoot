@@ -23,4 +23,4 @@ function uploadData(req, res) {
   }
 }
 
-module.exports = uploadData;
+export default uploadData;

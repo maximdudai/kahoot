@@ -1,42 +1,42 @@
-const express = require('express');
-const http = require('http');
-const cors = require('cors');
-const socketHandler = require('./app/socket/socket');
+import express from 'express';
+import { createServer } from 'http';
+import cors from 'cors';
+import { Server } from 'socket.io';
+import multer, { memoryStorage } from 'multer';
+import { config } from 'dotenv';
+
+import uploadData from './app/routes/routes.js';
+import socketHandler from './app/socket/socket.js';
+
+config();
+
 const app = express();
-const multer = require('multer');
-const uploadData = require('./app/routes/routes');
-
-const dotenv = require('dotenv');
-dotenv.config();
-
-
-const server = http.createServer(app);
+const server = createServer(app);
 
 app.use(cors({
-  origin: 'http://' + process.env.FRONTEND_ADDRESS + process.env.BACKEND_ADDRESS,
-  methods: ['GET', 'POST'],
+  origin: ["https://kahoot.pro"],
+  methods: ["GET", "POST"],
   credentials: true
 }));
 
-
-const io = require('socket.io')(server, {
+// Create a Socket.io server instance with proper configuration
+const io = new Server(server, {
   cors: {
-    origin: ["http://" + process.env.FRONTEND_ADDRESS + process.env.BACKEND_ADDRESS],
+    origin: ["https://kahoot.pro"],
     methods: ["GET", "POST"],
     credentials: true
   }
 });
 
-
+// Initialize socket handling
 socketHandler(io);
 
-// Set the port for HTTPS
-const PORT = 3000; // Standard HTTPS port
+// Set the port for the HTTP server
+const PORT = 4000;
 
-// Start HTTPS server
 server.listen(PORT, () => {
-  console.log(`HTTPS Server is running on http://51.178.18.74:${PORT}`);
+  console.log(`HTTP Server is running on http://51.178.18.74:${PORT}`);
 });
 
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ storage: memoryStorage() });
 app.post('/upload', upload.single('file'), uploadData);

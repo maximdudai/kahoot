@@ -1,9 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   env: {
-    SOCKET_URL: "https://51.178.18.74:3000",
+    SOCKET_URL: "https://kahoot.pro/api",  // Use domain, not raw IP
   },
-  distDir: "build",
+  distDir: "build", // Optional, default is ".next"
 };
 
 export default nextConfig;
