@@ -97,12 +97,13 @@ export default function CreateNewGame() {
         //redirect to waiting page
         router.push("/waiting", undefined, { shallow: true });
       } else {
-        setSendedRequest(false);
         alert(response.data.message);
       }
     } catch (error) {
       console.error("Error uploading file:", error);
       alert("Error uploading file.");
+    } finally {
+      setSendedRequest(false);
     }
   };
 

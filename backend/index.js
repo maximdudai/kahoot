@@ -1,62 +1,42 @@
 const express = require('express');
-// const https = require('https');
 const http = require('http');
-const fs = require('fs');
 const cors = require('cors');
-const socketIo = require('socket.io');
 const socketHandler = require('./app/socket/socket');
 const app = express();
 const multer = require('multer');
 const uploadData = require('./app/routes/routes');
-// Read the self-signed certificate and private key
-// const privateKey = fs.readFileSync('/etc/ssl/private/selfsigned.key', 'utf8');
-// const certificate = fs.readFileSync('/etc/ssl/certs/selfsigned.crt', 'utf8');
-// const credentials = { key: privateKey, cert: certificate };
 
-// Create HTTPS server
+const dotenv = require('dotenv');
+dotenv.config();
+
+
 const server = http.createServer(app);
 
 app.use(cors({
-  origin: 'http://192.168.1.200:3000',
+  origin: 'http://' + process.env.FRONTEND_ADDRESS + process.env.BACKEND_ADDRESS,
   methods: ['GET', 'POST'],
   credentials: true
 }));
 
-// // WebSocket setup
-// const io = require('socket.io')(server, {
-//   cors: {
-//     origin: ["https:www.kahoot.pro", "https://kahoot.pro", "http://192.168.1.200:3000"],
-//     methods: ["GET", "POST"],
-//     credentials: true,
-//     allowedHeaders: ["Access-Control-Allow-Headers", "Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"],
-//   }
-// });
-
 
 const io = require('socket.io')(server, {
   cors: {
-    origin: ["http://192.168.1.200:3000"],
+    origin: ["http://" + process.env.FRONTEND_ADDRESS + process.env.BACKEND_ADDRESS],
     methods: ["GET", "POST"],
     credentials: true
   }
 });
 
 
-// Your WebSocket event handlers
 socketHandler(io);
 
 // Set the port for HTTPS
-const PORT = 80; // Standard HTTPS port
+const PORT = 3000; // Standard HTTPS port
 
 // Start HTTPS server
 server.listen(PORT, () => {
   console.log(`HTTPS Server is running on http://51.178.18.74:${PORT}`);
 });
 
-// Your other routes (e.g., /upload)
 const upload = multer({ storage: multer.memoryStorage() });
-
 app.post('/upload', upload.single('file'), uploadData);
-app.get('/', function (req, res) {
-  res.send('Hello World')
-})
