@@ -52,7 +52,7 @@ export default function CreateNewGame() {
 
   const handleCreateGame = async () => {
     // prevent multiple requests
-    if(sendedRequest) 
+    if (sendedRequest)
       return;
 
     if (!gameFile) {
@@ -71,16 +71,11 @@ export default function CreateNewGame() {
     formData.append("file", gameFile);
 
     try {
-      const response = await axios.post(
-        // "http://192.168.1.180:5050/upload",
-        process.env.SOCKET_URL + "/upload",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await axios.post("https://kahoot.pro/api/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       if (response.data.success) {
         const newGameSettings = {
