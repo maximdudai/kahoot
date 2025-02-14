@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-const isProduction = process.env.NODE_ENV === 'production';  // Assuming you're using this for production check
+const isProduction = process.env.NEXT_PUBLIC_NODE_ENV === 'production';
 
 const nextConfig = {
   env: {
