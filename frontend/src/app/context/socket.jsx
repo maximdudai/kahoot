@@ -81,13 +81,9 @@ export default function SocketProvider({ children }) {
                 return;
             }
 
-            // Make a copy of the players array before modifying it
-            const updatedPlayers = [...localGameData.players, player];
-            localGameData = { ...localGameData, players: updatedPlayers };
-
-            // Update localStorage with the new player added
+            localGameData.players.push(player);
             localStorage.setItem("game", JSON.stringify(localGameData));
-
+            
             // Dispatch event to notify about the update
             const event = new Event("updateGamePlayers");
             window.dispatchEvent(event);

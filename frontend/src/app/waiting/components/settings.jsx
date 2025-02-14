@@ -16,14 +16,17 @@ export const GameSettings = () => {
             setPlayerList(gameData.players || []);
         };
 
-        // Add event listener
+        
+        // execute the function when page is loaded and when event is triggered
+        updatePlayerList();
         window.addEventListener("updateGamePlayers", updatePlayerList);
-
+    
         return () => {
             // Cleanup event listener on unmount
             window.removeEventListener("updateGamePlayers", updatePlayerList);
         };
     }, []);
+    
 
     return (
         gameData && (
