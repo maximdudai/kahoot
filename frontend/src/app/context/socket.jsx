@@ -5,7 +5,6 @@ import { io } from "socket.io-client";
 import { useRouter } from "next/navigation";
 import { isGameCreator } from "../utils/player";
 import { useBeforeUnload } from "react-router-dom";
-import { IoMdReturnLeft } from "react-icons/io";
 
 export const SocketContext = createContext(null);
 
@@ -25,27 +24,19 @@ export default function SocketProvider({ children }) {
     // auto join game if user has valid game data in local storage
     // confirmar se este codigo não é executado duma forma que não devia ??!?!?!
     useEffect(() => {
-
-        console.log("executar auto join game");
-
         // get data if user joined as a creator
         const localGameData = JSON.parse(localStorage.getItem("game"));
         // get data if user joined as a player
         const username = localStorage.getItem("username") ?? 'creator';
         const gameCode = localGameData?.gameSettings?.gameCode;
 
-        console.log(`localGameData: ${localGameData} | username: ${username} | gameCode: ${gameCode}`);
-
         if (!localGameData) {
-            console.log("No localGameData found in local storage");
             return;
         }
         if(!gameCode && !localGameData) {
-            console.log("No gameCode found in local storage");
             return;
         }
         if(!username && !localGameData) {
-            console.log("No username found in local storage");
             return;
         }
 
@@ -53,9 +44,6 @@ export default function SocketProvider({ children }) {
             return;
 
         socket?.emit("join-game", { gameCode, username }, (response) => {
-
-            console.log("response: ", response);
-
             if (response?.success === false) {
                 return;
             }

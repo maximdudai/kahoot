@@ -95,8 +95,6 @@ function joinGame(io, socket, data, callback) {
         const { gameCode, username } = data;
         const gameData = findGameByCode(gameCode);
 
-        console.log(`socket: ${socket.id} joined data: ${JSON.stringify(data)}`);
-
         // Return an error if the game ID is not found
         if (!(gameData && gameData.gameid)) {
             callback({ success: false });
@@ -122,7 +120,6 @@ function joinGame(io, socket, data, callback) {
         }
 
         callback({ gameData: newGameData, inQueue: gameTimer[gameData.gameid] !== null });
-
     } catch (error) {
         console.error(error);
     }
