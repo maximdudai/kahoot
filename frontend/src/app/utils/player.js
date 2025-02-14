@@ -36,9 +36,6 @@ export const isGameCreator = (socket) => {
 }
 
 export const getCorrectPercentage = (player) => {
-
-    console.log("Player", player);
-
     try {
         const correctAnswers = player?.answers?.filter((qData) => {
             // When someone join when the game is already started
@@ -56,9 +53,6 @@ export const getCorrectPercentage = (player) => {
 };
 
 export const getCorrectAnswers = (player) => {
-    
-    console.log("getCorrentAnswrs: ", player);
-
     try {
         const correctAnswers = player?.answers?.filter((qData) => {
             // When someone join when the game is already started

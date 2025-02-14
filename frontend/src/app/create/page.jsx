@@ -106,7 +106,7 @@ export default function CreateNewGame() {
                 setGameCode({ ...gameErrors, fileType: response.data.message });
             }
         } catch (error) {
-            setGameErrors({ ...gameErrors, fileType: error.response.data.message });
+            setGameErrors({ ...gameErrors, fileType: error.response?.data?.message });
         } finally {
             setSendedRequest(false);
         }
