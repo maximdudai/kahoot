@@ -54,9 +54,9 @@ export const QuestionAnswer = ({ question, options, disabled = false }) => {
   };
 
   return (
-    <div className="questionData mt-10 p-2 md:p-0 w-full flex justify-center items-center flex-col">
+    <div className="questionData mt-10 p-2 md:p-2 w-full flex justify-center items-center flex-col">
       <div className="bg-green-500 p-2 border-b-[1px] border-t-[1px] border-gray-300/20 w-full my-3">
-        <p className="text-2xl text-center">{question}</p>
+        <p className="text-2xl text-center font-kahootQuestion tracking-widest">{question}</p>
       </div>
 
       <div className="options w-full">
@@ -80,7 +80,7 @@ export const QuestionAnswer = ({ question, options, disabled = false }) => {
                   : "hover:bg-blue-400 cursor-pointer"
               }`}
             >
-              <p>{option.text}</p>
+              <p className="font-kahootAnswer">{option.text}</p>
               {option.isHint && (
                 <p className="max-w-max bg-black/50 p-0.5 px-4 uppercase italic rounded-full text-sm">
                   removed by creator

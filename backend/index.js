@@ -14,7 +14,7 @@ const app = express();
 const server = createServer(app);
 
 app.use(cors({
-  origin: ["https://kahoot.pro", "https://www.kahoot.pro"],
+  origin: ["https://kahoot.pro", "https://www.kahoot.pro", "http://localhost:3000"],
   methods: ["GET", "POST"],
   credentials: true
 }));
@@ -22,7 +22,7 @@ app.use(cors({
 // Create a Socket.io server instance with proper configuration
 const io = new Server(server, {
   cors: {
-    origin: ["https://kahoot.pro", "https://www.kahoot.pro"],
+    origin: ["https://kahoot.pro", "https://www.kahoot.pro", "http://localhost:3000"],
     methods: ["GET", "POST"],
     credentials: true
   }
@@ -35,7 +35,7 @@ socketHandler(io);
 const PORT = 4000;
 
 server.listen(PORT, () => {
-  console.log(`HTTP Server is running on http://51.178.18.74:${PORT}`);
+  console.log(`HTTP Server is running on http://localhost:${PORT}`);
 });
 
 const upload = multer({ storage: memoryStorage() });

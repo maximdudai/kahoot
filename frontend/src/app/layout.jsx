@@ -25,13 +25,10 @@ export default function RootLayout({ children }) {
               {children}
             </main>
 
-            <footer className="relative text-white flex flex-row-reverse items-center gap-3 p-2">
+            <footer className="absolute bottom-0 right-0 text-white gap-3 p-2">
               <Link target="_blank" href="https://github.com/maximdudai/kahoot">
-                <FaGithub className="w-10 h-10" />
+                <FaGithub className="w-12 h-12" />
               </Link>
-              <p className="uppercase text-xs">
-                git push origin creativity
-              </p>
             </footer>
           </div>
         </SocketProvider>

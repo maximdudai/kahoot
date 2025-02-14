@@ -29,6 +29,26 @@
         "Model-Vector-Controller"
       ],
       "correct_option_index": 0
+    },
+    {
+      "question": "O que representa o padrão de arquitetura MVC?",
+      "options": [
+        "Model-View-Controller",
+        "Model-View-Connection",
+        "Memory-View-Controller",
+        "Model-Vector-Controller"
+      ],
+      "correct_option_index": 0
+    },
+    {
+      "question": "O que representa o padrão de arquitetura MVC?",
+      "options": [
+        "Model-View-Controller",
+        "Model-View-Connection",
+        "Memory-View-Controller",
+        "Model-Vector-Controller"
+      ],
+      "correct_option_index": 0
     }
   ]
 }

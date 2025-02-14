@@ -68,8 +68,10 @@ export default function Game() {
     };
   }, []);
 
-  if (isCreator === null) {
-    return <div>Loading...</div>;
+  // redirect to rejoin if there is data if not redirect to home
+  if(localStorage.getItem("game") === null) {
+    router.push("/");
+    return null;
   }
 
   return isCreator ? (

@@ -71,7 +71,10 @@ export default function CreateNewGame() {
     formData.append("file", gameFile);
 
     try {
-      const response = await axios.post("https://kahoot.pro/api/upload", formData, {
+      const isProduction = process.env.NODE_ENV === "production";
+      const url = isProduction ? process.env.NEXT_PUBLIC_SOCKET_URL : "http://localhost:4000/api/upload";
+
+      const response = await axios.post(url, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -109,7 +112,7 @@ export default function CreateNewGame() {
   return (
     <>
       <div className="container md:w-1/2 bg-black/50 p-2 shadow-lg">
-        <h1 className="text-center bg-white/20 rounded-md p-2 text-white tracking-wide uppercase text-md">
+        <h1 className="font-kahoot_monomaniac text-center bg-white/20 rounded-md p-2 text-white tracking-wide uppercase">
           Create Game
         </h1>
 

@@ -18,9 +18,10 @@ export default function Home() {
 
   const handleJoinGame = () => {
     try {
-      // Prevent multiple requests
       if(sendedRequest) 
         return;
+
+      setSendedRequest(true);
 
       if (username === "" || gameCode === "") {
         alert("Please fill in all fields.");
@@ -44,8 +45,9 @@ export default function Home() {
         router.push("/waiting", undefined, { shallow: true });
       });
     } catch (e) {
-      setSendedRequest(false);
       console.error(e);
+    } finally {
+      setSendedRequest(false);
     }
   };
 
