@@ -13,8 +13,6 @@ export const Playerlist = () => {
             const gameData = JSON.parse(localStorage.getItem("game")) || {};
             setLocalGameData(gameData); 
             setPlayerList(gameData.players || []);
-
-            console.log("Playerlist updated", gameData.players);
         };
 
         // Update player list on mount and listen for updates

@@ -79,10 +79,7 @@ export default function CreateNewGame() {
         formData.append("file", gameFile);
 
         try {
-            const isProduction = process.env.NODE_ENV === "production";
-            const url = isProduction ? process.env.NEXT_PUBLIC_SOCKET_URL : "http://localhost:4000/api/upload";
-
-            const response = await axios.post(url, formData, {
+            const response = await axios.post(process.env.SOCKET_URL + "api/upload", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
@@ -106,6 +103,7 @@ export default function CreateNewGame() {
                 setGameCode({ ...gameErrors, fileType: response.data.message });
             }
         } catch (error) {
+            console.error("Error creating game:", error);
             setGameErrors({ ...gameErrors, fileType: error.response?.data?.message });
         } finally {
             setSendedRequest(false);
