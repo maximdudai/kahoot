@@ -3,4 +3,5 @@ frontend/node_modules/
 
 .history/
 
-.ppk
+# prevent upload .ppk file
+*.ppk

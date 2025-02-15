@@ -21,45 +21,6 @@ export default function SocketProvider({ children }) {
         };
     }, []);
 
-    // auto join game if user has valid game data in local storage
-    // confirmar se este codigo não é executado duma forma que não devia ??!?!?!
-    useEffect(() => {
-        // get data if user joined as a creator
-        const localGameData = JSON.parse(localStorage.getItem("game"));
-        // get data if user joined as a player
-        const username = localStorage.getItem("username") ?? 'creator';
-        const gameCode = localGameData?.gameSettings?.gameCode;
-
-        if (!localGameData) {
-            return;
-        }
-        if(!gameCode && !localGameData) {
-            return;
-        }
-        if(!username && !localGameData) {
-            return;
-        }
-
-        if (socket === null)
-            return;
-
-        socket?.emit("join-game", { gameCode, username }, (response) => {
-            if (response?.success === false) {
-                return;
-            }
-
-            localStorage.setItem("username", username);
-            localStorage.setItem("socket", socket.id);
-            localStorage.setItem("game", JSON.stringify(response?.gameData));
-
-            if (response?.inQueue) {
-                router.push("/queue", undefined, { shallow: true });
-                return;
-            }
-            router.push("/waiting", undefined, { shallow: true });
-        });
-    }, [socket]);
-
     useEffect(() => {
         const handleCancelGame = () => {
             alert("Game has been canceled, redirecting to the home page.");

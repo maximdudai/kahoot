@@ -5,18 +5,23 @@ import { FaGithub } from "react-icons/fa";
 import Link from "next/link";
 import SocketProvider from "./context/socket";
 
-const inter = Inter({ subsets: ["latin"] });
-
 export const metadata = {
   title: "Kahoot - Game it up!",
   description: "Create and play quizzes.",
+  image: "/assets/logo.png",
+  url: "https://kahoot.pro",
+  type: "website",
+  siteName: "Kahoot",
+  locale: "en",
+  lang: "en",
+  keywords: ["kahoot", "quiz", "game", "fun", "play", "create", "learn", "education", "students", "teachers", "school", "college", "university"],
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>
-        <SocketProvider>
+      <SocketProvider>
+        <body>
           <div className="flex flex-col justify-center items-center min-h-screen relative">
             <div className="bgImage">
               <div className="bgEffect"></div>
@@ -31,8 +36,8 @@ export default function RootLayout({ children }) {
               </Link>
             </footer>
           </div>
-        </SocketProvider>
-      </body>
+        </body>
+      </SocketProvider>
     </html>
   );
 }

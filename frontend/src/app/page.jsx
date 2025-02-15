@@ -16,7 +16,7 @@ export default function Home() {
     const [username, setUsername] = useState("");
     const [gameCode, setGameCode] = useState("");
     const router = useRouter();
-    const [sendedRequest, setSendedRequest] = useState(false);
+    const [sentRequest, setSentRequest] = useState(false);
     const socket = useContext(SocketContext);
 
     const [gameError, setGameError] = useState({
@@ -26,55 +26,72 @@ export default function Home() {
     });
 
     const onInputUpdate = (e) => {
-    
-        if(e.target.id === "username") {
+        if (e.target.id === "username") {
             setUsername(e.target.value);
-            gameError.login = false;
-        } else if(e.target.id === "gameCode") {
+            setGameError((prev) => ({ ...prev, login: false, error: "" }));
+        } else if (e.target.id === "gameCode") {
             setGameCode(e.target.value);
-            gameError.code = false;
+            setGameError((prev) => ({ ...prev, code: false, error: "" }));
         }
-        setGameError({ ...gameError, error: "" });
     }
 
 
     const handleJoinGame = () => {
+        if (sentRequest) return;
+
+        if (username === "" || gameCode === "") {
+            setGameError((prev) => ({
+                ...prev,
+                login: username === "",
+                code: gameCode === ""
+            }));
+            return;
+        }
+
+        setSentRequest(true);
+
         try {
-            if (sendedRequest)
-                return;
-
-            setSendedRequest(true);
-
-            if (username === "" || gameCode === "") {
-                setGameError({ ...gameError, login: username === "", code: gameCode === "" });
-                return;
-            }
-
-
             socket?.emit("join-game", { gameCode, username }, (response) => {
-                if (response?.success === false) {
-                    setGameError({ ...gameError, error: "Game not found!" });
+                if (!response?.success) {
+                    setGameError((prev) => ({ ...prev, error: "Game not found!" }));
                     return;
                 }
 
                 localStorage.setItem("username", username);
                 localStorage.setItem("socket", socket.id);
-                localStorage.setItem("game", JSON.stringify(response?.gameData));
+                localStorage.setItem("game", JSON.stringify(response.gameData));
 
-                if (response?.inQueue) {
-                    router.push("/queue", undefined, { shallow: true });
-                    return;
-                }
-                router.push("/waiting", undefined, { shallow: true });
+                router.push(response.inQueue ? "/queue" : "/waiting", undefined, { shallow: true });
             });
         } catch (e) {
             console.error(e);
         } finally {
-            setSendedRequest(false);
+            setSentRequest(false);
         }
     };
-    const isAuthHasError = () => gameError.login || gameError.code || gameError.error !== "";
 
+    // auto join game if user has valid game data in local storage
+    useEffect(() => {
+        const localGameData = JSON.parse(localStorage.getItem("game"));
+        const storedUsername = localStorage.getItem("username") || 'creator';
+        const gameCode = localGameData?.gameSettings?.gameCode;
+
+        if (!localGameData || !gameCode) return;
+
+        if (!socket) return;
+
+        socket.emit("join-game", { gameCode, username: storedUsername }, (response) => {
+            if (!response?.success) return;
+
+            localStorage.setItem("username", storedUsername);
+            localStorage.setItem("socket", socket.id);
+            localStorage.setItem("game", JSON.stringify(response.gameData));
+
+            router.push(response.inQueue ? "/queue" : "/waiting", undefined, { shallow: true });
+        });
+    }, [socket]);
+
+    const isAuthHasError = () => gameError.login || gameError.code || gameError.error !== "";
     return (
         <div className="text-black w-full md:w-1/2 xl:w-1/3 p-2 flex flex-col gap-3 justify-center rounded-md">
             <Kahoot />
@@ -114,7 +131,7 @@ export default function Home() {
             <div className="gameButtons flex flex-col md:flex-row justify-center gap-4 cursor-pointer">
                 <button
                     className="bg-emerald-500 w-full lg:w-1/3 uppercase tracking-widest font-bold text-white p-2 rounded-md hover:scale-110 transform transition-all"
-                    disabled={sendedRequest}
+                    disabled={sentRequest}
                     onClick={handleJoinGame}
                 >
                     Join
