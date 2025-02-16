@@ -3,7 +3,7 @@
 import { createContext, useEffect, useState, useCallback } from "react";
 import { io } from "socket.io-client";
 import { useRouter } from "next/navigation";
-import { isGameCreator } from "../utils/player";
+import { generatePlayerUuid, isGameCreator } from "../utils/player";
 import { useBeforeUnload } from "react-router-dom";
 
 export const SocketContext = createContext(null);
@@ -11,10 +11,16 @@ export const SocketContext = createContext(null);
 export default function SocketProvider({ children }) {
     const [socket, setSocket] = useState(null);
     const router = useRouter();
+    const [userToken, setUserToken] = useState(null);
 
     useEffect(() => {
         const newSocket = io(process.env.SOCKET_URL);
         setSocket(newSocket);
+
+        //generate uuid token for user
+        const token = generatePlayerUuid();
+        setUserToken(token);
+        sessionStorage.setItem("token", token);
 
         return () => {
             newSocket.disconnect();

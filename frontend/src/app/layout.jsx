@@ -20,8 +20,8 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <SocketProvider>
-        <body>
+      <body>
+        <SocketProvider>
           <div className="flex flex-col justify-center items-center min-h-screen relative">
             <div className="bgImage">
               <div className="bgEffect"></div>
@@ -36,8 +36,8 @@ export default function RootLayout({ children }) {
               </Link>
             </footer>
           </div>
-        </body>
-      </SocketProvider>
+        </SocketProvider>
+      </body>
     </html>
   );
 }

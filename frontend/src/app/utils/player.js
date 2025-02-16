@@ -1,3 +1,11 @@
+
+import { v4 as uuidv4 } from 'uuid';
+
+
+export const generatePlayerUuid = () => {
+    return uuidv4();
+}
+
 export const getPlayerBySocket = (socketId) => {
     const localGameData = JSON.parse(localStorage.getItem("game"));
     const player = localGameData.players.find((player) => player.socket === socketId);

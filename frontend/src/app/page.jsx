@@ -8,9 +8,7 @@ import { RiUserReceived2Line } from "react-icons/ri";
 import { MdOutlinePassword } from "react-icons/md";
 import { SocketContext } from "./context/socket";
 import { Kahoot } from "./components/title";
-
-import { PiWarningCircleThin } from "react-icons/pi";
-
+import { generatePlayerUuid } from "./utils/player";
 
 export default function Home() {
     const [username, setUsername] = useState("");
@@ -72,24 +70,28 @@ export default function Home() {
 
     // auto join game if user has valid game data in local storage
     useEffect(() => {
-        const localGameData = JSON.parse(localStorage.getItem("game"));
+        const localGameData = JSON.parse(localStorage.getItem("game") || null);
         const storedUsername = localStorage.getItem("username") || 'creator';
-        const gameCode = localGameData?.gameSettings?.gameCode;
-
+        const gameCode = localGameData?.gameSettings?.gameCode || null;
+    
         if (!localGameData || !gameCode) return;
-
         if (!socket) return;
-
+    
         socket.emit("join-game", { gameCode, username: storedUsername }, (response) => {
-            if (!response?.success) return;
-
+            if (!response?.success) {
+                localStorage.removeItem("game");
+                localStorage.removeItem("username");
+                localStorage.removeItem("socket");
+                return;
+            }
+    
             localStorage.setItem("username", storedUsername);
             localStorage.setItem("socket", socket.id);
             localStorage.setItem("game", JSON.stringify(response.gameData));
-
+    
             router.push(response.inQueue ? "/queue" : "/waiting", undefined, { shallow: true });
         });
-    }, [socket]);
+    }, []);
 
     const isAuthHasError = () => gameError.login || gameError.code || gameError.error !== "";
     return (
