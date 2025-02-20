@@ -42,3 +42,9 @@ To create a game, users need to upload a JSON file in the following format:
     ...
   ]
 }
+```
+![game-screen](https://github.com/user-attachments/assets/3955923d-74f6-4919-aaf2-9c83421407a9)
+![create](https://github.com/user-attachments/assets/fe2573e5-f9ec-44cd-92f8-2665e9d83390)
+![results](https://github.com/user-attachments/assets/2e4cfa6c-fe44-467e-8166-8baf85ed02b9)
+
+
