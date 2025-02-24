@@ -1,4 +1,5 @@
 import Player from '../player/player.js';
+import { v4 as uuidv4 } from 'uuid';
 
 let games = [];
 let gameTimer = [];
@@ -66,12 +67,14 @@ export default (io) => {
     });
 };
 
-function createGame(gameSettings, socket, callback) {
+function createGame(gameSettings, _, callback) {
+
+    const generatedGameId = uuidv4();
 
     try {
         const game = {
             gameSettings,
-            gameid: socket.id,
+            gameid: generatedGameId,
             players: [],
             currentQuestionIndex: 0,
             playersInQueue: [],
