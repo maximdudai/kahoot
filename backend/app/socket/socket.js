@@ -74,6 +74,7 @@ function createGame(gameSettings, _, callback) {
     try {
         const game = {
             gameSettings,
+            creator: generatedGameId,
             gameid: generatedGameId,
             players: [],
             currentQuestionIndex: 0,

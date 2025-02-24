@@ -13,7 +13,8 @@ module.exports = {
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
       fontFamily: {
-        kahoot: ["Kahoot", "sans-serif"],
+        kahoot: ["kahoot", "sans-serif"],
+        bungee: ["bungee", "cursive"],
       }
     },
   },

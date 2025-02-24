@@ -2,12 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Bungee&display=swap');
-
-.font-press-start {
-    font-family: "Bungee", sans-serif;
-}
-
 .animate-pulse-slow {
     animation: pulse 2s infinite ease-in-out;
 }
