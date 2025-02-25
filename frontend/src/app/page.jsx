@@ -8,7 +8,6 @@ import { RiUserReceived2Line } from "react-icons/ri";
 import { MdOutlinePassword } from "react-icons/md";
 import { SocketContext } from "./context/socket";
 import { Kahoot } from "./components/title";
-import { generatePlayerUuid } from "./utils/player";
 
 export default function Home() {
     const [username, setUsername] = useState("");
@@ -50,13 +49,13 @@ export default function Home() {
 
         try {
             socket?.emit("join-game", { gameCode, username }, (response) => {
-                if (!response?.success) {
-                    setGameError((prev) => ({ ...prev, error: "Game not found!" }));
+                if(!response.success && response.error) {
+                    setGameError((prev) => ({ ...prev, error: response.error }));
                     return;
                 }
 
                 localStorage.setItem("username", username);
-                localStorage.setItem("socket", socket.id);
+                localStorage.setItem("token", response.token);
                 localStorage.setItem("game", JSON.stringify(response.gameData));
 
                 router.push(response.inQueue ? "/queue" : "/waiting", undefined, { shallow: true });
@@ -81,12 +80,12 @@ export default function Home() {
             if (!response?.success) {
                 localStorage.removeItem("game");
                 localStorage.removeItem("username");
-                localStorage.removeItem("socket");
+                localStorage.removeItem("token");
                 return;
             }
-    
+
             localStorage.setItem("username", storedUsername);
-            localStorage.setItem("socket", socket.id);
+            localStorage.setItem("token", response.token);
             localStorage.setItem("game", JSON.stringify(response.gameData));
     
             router.push(response.inQueue ? "/queue" : "/waiting", undefined, { shallow: true });

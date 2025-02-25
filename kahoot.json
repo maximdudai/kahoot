@@ -1,54 +1,104 @@
 {
   "game": [
     {
-      "question": "Qual é a finalidade principal do LINQ em C#?",
+      "question": "Qual é o objetivo principal dos sistemas de mensagens (messaging middleware)?",
       "options": [
-        "Renderizar gráficos na interface do usuário",
-        "Consultar e atualizar dados de diferentes fontes",
-        "Gerenciar conexões de rede",
-        "Compilar código em linguagens de baixo nível"
+        "Gerenciar conexões de banco de dados",
+        "Mover mensagens do produtor para o consumidor de forma confiável",
+        "Renderizar interfaces gráficas",
+        "Compilar código em tempo real"
       ],
       "correct_option_index": 1
     },
     {
-      "question": "O que a palavra-chave 'var' em C# especifica na declaração de uma variável?",
+      "question": "O que acontece se o servidor falha em um sistema de mensagens como o RabbitMQ ou Mosquitto?",
       "options": [
-        "Que a variável é estaticamente tipada",
-        "Que o tipo da variável será inferido pelo compilador",
-        "Que a variável deve ser serializada",
-        "Que a variável é de tipo dinâmico"
+        "As mensagens são perdidas permanentemente",
+        "O middleware cliente guarda as mensagens",
+        "O cliente trava imediatamente",
+        "A comunicação é interrompida sem recuperação"
       ],
       "correct_option_index": 1
     },
     {
-      "question": "O que representa o padrão de arquitetura MVC?",
+      "question": "Qual é uma das principais vantagens do modelo de mensagens em comparação com o Pedido/Resposta?",
       "options": [
-        "Model-View-Controller",
-        "Model-View-Connection",
-        "Memory-View-Controller",
-        "Model-Vector-Controller"
+        "Respostas mais rápidas em tempo real",
+        "Desacoplamento máximo entre produtor e consumidor",
+        "Menor consumo de memória",
+        "Dependência direta entre aplicações"
+      ],
+      "correct_option_index": 1
+    },
+    {
+      "question": "O que significa 'Send and Forget' em sistemas de mensagens?",
+      "options": [
+        "A mensagem é enviada e o produtor passa à próxima tarefa sem esperar resposta",
+        "A mensagem é descartada após o envio",
+        "O consumidor responde imediatamente ao produtor",
+        "O broker armazena a mensagem indefinidamente"
       ],
       "correct_option_index": 0
     },
     {
-      "question": "O que representa o padrão de arquitetura MVC?",
+      "question": "Qual protocolo é utilizado pelo Mosquitto Messaging Broker?",
       "options": [
-        "Model-View-Controller",
-        "Model-View-Connection",
-        "Memory-View-Controller",
-        "Model-Vector-Controller"
+        "HTTP",
+        "FTP",
+        "MQTT",
+        "SMTP"
       ],
-      "correct_option_index": 0
+      "correct_option_index": 2
     },
     {
-      "question": "O que representa o padrão de arquitetura MVC?",
+      "question": "Qual é a porta padrão usada pelo protocolo MQTT no Mosquitto?",
       "options": [
-        "Model-View-Controller",
-        "Model-View-Connection",
-        "Memory-View-Controller",
-        "Model-Vector-Controller"
+        "80",
+        "1883",
+        "443",
+        "8080"
       ],
-      "correct_option_index": 0
+      "correct_option_index": 1
+    },
+    {
+      "question": "O que representa o QoS 'Exactly Once' no Mosquitto?",
+      "options": [
+        "A mensagem é entregue no máximo uma vez",
+        "A mensagem é entregue pelo menos uma vez",
+        "A mensagem é entregue exatamente uma vez",
+        "A mensagem não é entregue"
+      ],
+      "correct_option_index": 2
+    },
+    {
+      "question": "Em que cenário o modelo Pedido/Resposta é mais apropriado que o messaging?",
+      "options": [
+        "Comunicação assíncrona entre várias aplicações",
+        "Cenários que exigem operação desconectada",
+        "Cenários que requerem resposta em tempo real",
+        "Integração de dispositivos IoT"
+      ],
+      "correct_option_index": 2
+    },
+    {
+      "question": "Qual é uma característica do Publish/Subscribe em comparação com o Pedido/Resposta?",
+      "options": [
+        "Cada aplicação gerencia várias ligações diretas",
+        "Cada aplicação gerencia apenas uma ligação com o broker",
+        "Requer sincronização constante entre aplicações",
+        "É menos eficiente em cenários com muitas aplicações"
+      ],
+      "correct_option_index": 1
+    },
+    {
+      "question": "Qual biblioteca é usada como dependência para a API Java do Mosquitto?",
+      "options": [
+        "Apache Commons",
+        "Eclipse Paho Java Client",
+        "Spring Framework",
+        "Hibernate"
+      ],
+      "correct_option_index": 1
     }
   ]
 }

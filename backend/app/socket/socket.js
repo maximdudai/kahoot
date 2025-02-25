@@ -66,51 +66,75 @@ export default (io) => {
         });
     });
 };
-
-function createGame(gameSettings, _, callback) {
-
+function createGame(gameSettings, socket, callback) {
     const generatedGameId = uuidv4();
 
     try {
+        const playerData = {
+            username: gameSettings.creator,
+            token: generatedGameId,
+            socket: socket.id,
+            isCreator: true
+        };
+
+        // Create the game object with modified gameSettings
         const game = {
-            gameSettings,
-            creator: generatedGameId,
+            gameSettings: {
+                ...gameSettings,
+                creator: playerData
+            },
             gameid: generatedGameId,
             players: [],
             currentQuestionIndex: 0,
             playersInQueue: [],
         };
+
+        // Add to games array
         games.push(game);
 
+        // Initialize timer and interval
         gameTimer[game.gameid] = null;
         gameInterval[game.gameid] = null;
 
-        // Emit the create-game event to the creator
-        callback({ gameData: game });
+        // Add the creator to the game
+        addPlayerToGame(playerData.username, socket, generatedGameId, game);
+
+        // Send response back
+        callback({
+            gameData: {
+                gameSettings: game.gameSettings, // Use updated gameSettings
+                gameid: game.gameid,
+                players: game.players
+            },
+            token: generatedGameId
+        });
     }
     catch (error) {
         console.error(error);
     }
 }
-
-
 function joinGame(io, socket, data, callback) {
     try {
         const { gameCode, username } = data;
         const gameData = findGameByCode(gameCode);
+        const playerUuid = uuidv4();
 
         // Return an error if the game ID is not found
         if (!(gameData && gameData.gameid)) {
-            callback({ success: false });
+            callback({
+                success: false,
+                error: "Game not found!"
+            });
             return;
         }
 
         // Add the player to the game
-        addPlayerToGame(username, socket, gameData);
+        addPlayerToGame(username, socket, playerUuid, gameData);
 
         io.to(gameData.gameid.toString()).emit('player-join', {
             username,
             socket: socket.id,
+            token: playerUuid,
             score: 0
         });
 
@@ -123,7 +147,7 @@ function joinGame(io, socket, data, callback) {
             newGameData = gameData;
         }
 
-        callback({ gameData: newGameData, inQueue: gameTimer[gameData.gameid] !== null });
+        callback({ gameData: newGameData, inQueue: gameTimer[gameData.gameid] !== null , token: playerUuid });
     } catch (error) {
         console.error(error);
     }
@@ -186,9 +210,9 @@ function cancelGame(io, gameid) {
     }
 }
 
-function addPlayerToGame(username, socket, game) {
+function addPlayerToGame(username, socket, token, game) {
     try {
-        const newPlayer = new Player(username, socket.id, game.gameid);
+        const newPlayer = new Player(username, socket.id, token, game.gameid);
         game.players.push(newPlayer);
 
         // Add the player to the queue if the game has already started
@@ -206,7 +230,10 @@ function addPlayerToGame(username, socket, game) {
 
 function findGameByCode(code) {
     try {
+
         const game = games ? games.find((game) => game.gameSettings.gameCode === code) : null;
+
+        console.log("findGameByCode", game);
 
         if (!game) {
             return null;

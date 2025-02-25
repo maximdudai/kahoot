@@ -44,7 +44,7 @@ export default function CreateNewGame() {
     const handleCopyGameCode = async () => {
         try {
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                await navigator.clipboard.writeText(gameCode);
+                await navigator.clipboard.writeText(gameSettings.gameCode);
                 console.log("Game code copied to clipboard");
             } else {
                 throw new Error("Clipboard API not supported");
@@ -138,13 +138,14 @@ export default function CreateNewGame() {
             if (response.data.success) {
                 const newGameSettings = {
                     ...gameSettings,
-                    questions: response.data.data.game,
                     totalQuestions: response.data.data.game.length,
                 };
                 setGameSettings(newGameSettings);
 
                 socket.emit("create-game", newGameSettings, (response) => {
                     localStorage.setItem("game", JSON.stringify(response?.gameData));
+                    localStorage.setItem("username", gameSettings.creator);
+                    localStorage.setItem("token", response.token);
                 });
 
                 //redirect to waiting page
@@ -166,7 +167,7 @@ export default function CreateNewGame() {
 
     return (
         <>
-            <div className="container md:w-1/2 bg-gradient-to-b from-purple-900 to-black p-4 shadow-2xl rounded-xl border-2 border-yellow-500">
+            <div className="container lg:w-1/2 bg-gradient-to-b from-purple-900 to-black p-4 shadow-2xl rounded-xl border-2 border-yellow-500">
                 <h1 className="font-kahoot_monomaniac text-center bg-gradient-to-r from-yellow-400 to-red-500 text-transparent bg-clip-text rounded-md p-3 text-2xl tracking-wide uppercase animate-pulse-slow">
                     Create Game
                 </h1>
