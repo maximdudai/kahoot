@@ -30,7 +30,10 @@ export default function RootLayout({ children }) {
               {children}
             </main>
 
-            <footer className="absolute bottom-0 right-0 text-white gap-3 p-2">
+            <footer className="absolute text-xs flex items-center bottom-0 margin-auto text-white gap-3 p-2">
+              <div className="privacypolicy uppercase">
+                <Link href="/privacypolicy">Privacy Policy</Link>
+              </div>
               <Link target="_blank" href="https://github.com/maximdudai/kahoot">
                 <FaGithub className="w-12 h-12" />
               </Link>

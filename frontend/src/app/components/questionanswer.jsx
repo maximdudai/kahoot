@@ -1,12 +1,10 @@
 import { useState, useContext, useEffect } from "react";
 import { SocketContext } from "../context/socket";
-import { isGameCreator } from "../utils/player";
 
 export const QuestionAnswer = ({ question, options, disabled = false }) => {
-  const socket = useContext(SocketContext);
+  const {socket, isCreator} = useContext(SocketContext);
   const [response, setResponse] = useState(null);
   const [hints, setHints] = useState([]);
-  const isCreator = isGameCreator(socket?.id);
 
   const isAnswerHint = (index) => {
     return hints?.includes(index);

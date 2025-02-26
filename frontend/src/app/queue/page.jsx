@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 
 
 export default function GameQueue() {
-  const socket = useContext(SocketContext);
+  const {socket} = useContext(SocketContext);
   const router = useRouter();
 
   useEffect(() => {

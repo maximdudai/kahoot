@@ -10,7 +10,7 @@ import { LeaveGame } from "@/app/components/leavegame";
 
 export const CreatorScreen = ({ question, options, timer, handleNextQuestion }) => {
   const [playerList, setPlayerList] = useState([]);
-  const socket = useContext(SocketContext);
+  const {socket} = useContext(SocketContext);
 
   useEffect(() => {
     const localGameData = JSON.parse(localStorage.getItem("game"));

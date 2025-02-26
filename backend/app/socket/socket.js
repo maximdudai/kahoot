@@ -101,8 +101,10 @@ function createGame(gameSettings, socket, callback) {
 
         // Send response back
         callback({
+            success: true,
+            isCreator: true,
             gameData: {
-                gameSettings: game.gameSettings, // Use updated gameSettings
+                gameSettings: game.gameSettings,
                 gameid: game.gameid,
                 players: game.players
             },
@@ -115,9 +117,19 @@ function createGame(gameSettings, socket, callback) {
 }
 function joinGame(io, socket, data, callback) {
     try {
-        const { gameCode, username } = data;
+        const { gameCode, username, token } = data;
         const gameData = findGameByCode(gameCode);
-        const playerUuid = uuidv4();
+        const playerUuid = token ?? uuidv4();
+
+        const isPlayerInGame = findPlayerByUuid(gameData, token);
+
+        if (isPlayerInGame) {
+            callback({
+                success: false,
+                error: "Player already in game!"
+            });
+            return;
+        }
 
         // Return an error if the game ID is not found
         if (!(gameData && gameData.gameid)) {
@@ -138,16 +150,25 @@ function joinGame(io, socket, data, callback) {
             score: 0
         });
 
-        //in case of the request is maded by the creater (comparing the socket id) then return the full game data
+        //in case of the request is maded by the creater (comparing the token) then return the full game data
         let newGameData = [];
-        if (socket.id !== gameData.gameid) {
+        let isCreator = false;
+        if (token !== gameData.gameid) {
             newGameData = JSON.parse(JSON.stringify(gameData));
             delete newGameData.gameSettings.questions;
+            delete newGameData.creator;
         } else {
             newGameData = gameData;
+            isCreator = true;
         }
 
-        callback({ gameData: newGameData, inQueue: gameTimer[gameData.gameid] !== null , token: playerUuid });
+        callback({
+            success: true,
+            isCreator,
+            gameData: newGameData,
+            inQueue: (!isCreator && gameTimer[gameData.gameid] !== null),
+            token: playerUuid
+        });
     } catch (error) {
         console.error(error);
     }
@@ -215,8 +236,10 @@ function addPlayerToGame(username, socket, token, game) {
         const newPlayer = new Player(username, socket.id, token, game.gameid);
         game.players.push(newPlayer);
 
-        // Add the player to the queue if the game has already started
-        if (gameTimer[game.gameid] !== null) {
+        const isNewPlayerTheCreator = isPlayerCreator(game, token);
+
+        // Add the player (if it's not creator) to the queue if the game has already started
+        if (!isNewPlayerTheCreator && gameTimer[game.gameid] !== null) {
             newPlayer.inQueue = true;
             game.playersInQueue.push(newPlayer);
         }
@@ -230,16 +253,8 @@ function addPlayerToGame(username, socket, token, game) {
 
 function findGameByCode(code) {
     try {
-
-        const game = games ? games.find((game) => game.gameSettings.gameCode === code) : null;
-
-        console.log("findGameByCode", game);
-
-        if (!game) {
-            return null;
-        }
-
-        return game;
+        const game = games ? games?.find((game) => game.gameSettings.gameCode === code) : null;
+        return game ?? null;
     } catch (error) {
         console.error(error);
     }
@@ -248,13 +263,9 @@ function findGameByCode(code) {
 
 function findGameById(id) {
     try {
-        const game = games ? games.find((game) => game.gameid === id) : null;
+        const game = games ? games?.find((game) => game.gameid === id) : null;
 
-
-        if (!game)
-            return null;
-
-        return game;
+        return game ?? null;
     } catch (error) {
         console.error(error);
     }
@@ -262,13 +273,17 @@ function findGameById(id) {
 
 function findPlayerBySocketId(game, socketId) {
     try {
-        const player = game.players.find((player) => player.socket === socketId);
+        const player = game?.players?.find((player) => player.socket === socketId);
+        return player ?? null;
+    } catch (error) {
+        console.error(error);
+    }
+}
 
-        if (!player) {
-            return null;
-        }
-
-        return player;
+function findPlayerByUuid(game, uuid) {
+    try {
+        const player = game?.players?.find((player) => player.token === uuid);
+        return player ?? null;
     } catch (error) {
         console.error(error);
     }
@@ -485,4 +500,13 @@ function handleQuestionHint(io, data) {
     catch (error) {
         console.error(error);
     }
+}
+
+function isPlayerCreator(gameid, token) {
+    const game = findGameById(gameid);
+
+    if (!game)
+        return false;
+
+    return game.gameSettings.creator.token === token;
 }

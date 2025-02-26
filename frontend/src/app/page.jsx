@@ -1,137 +1,166 @@
 "use client";
 
-import React, { useState, useContext, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useContext } from "react";
 import Link from "next/link";
-
 import { RiUserReceived2Line } from "react-icons/ri";
 import { MdOutlinePassword } from "react-icons/md";
-import { SocketContext } from "./context/socket";
 import { Kahoot } from "./components/title";
+import { SocketContext } from "./context/socket";
 
 export default function Home() {
     const [username, setUsername] = useState("");
     const [gameCode, setGameCode] = useState("");
-    const router = useRouter();
     const [sentRequest, setSentRequest] = useState(false);
-    const socket = useContext(SocketContext);
+    const [gameError, setGameError] = useState({ error: "", login: false, code: false });
+    const router = useRouter();
+    const { socket, setIsCreator } = useContext(SocketContext);
+    const [isAlreadyInGame, setIsAlreadyInGame] = useState(false);
 
-    const [gameError, setGameError] = useState({
-        error: "",
-        login: false,
-        code: false
-    });
-
-    const onInputUpdate = (e) => {
-        if (e.target.id === "username") {
-            setUsername(e.target.value);
+    // Memoize input handler to avoid unnecessary re-renders
+    const onInputUpdate = useCallback((e) => {
+        const { id, value } = e.target;
+        if (id === "username") {
+            setUsername(value);
             setGameError((prev) => ({ ...prev, login: false, error: "" }));
-        } else if (e.target.id === "gameCode") {
-            setGameCode(e.target.value);
+        } else if (id === "gameCode") {
+            setGameCode(value);
             setGameError((prev) => ({ ...prev, code: false, error: "" }));
         }
-    }
+    }, []);
 
-
-    const handleJoinGame = () => {
-        if (sentRequest) return;
-
-        if (username === "" || gameCode === "") {
+    // Centralized function to validate inputs
+    const validateInputs = () => {
+        if (!username || !gameCode) {
             setGameError((prev) => ({
                 ...prev,
-                login: username === "",
-                code: gameCode === ""
+                login: !username,
+                code: !gameCode,
             }));
+            return false;
+        }
+        return true;
+    };
+
+    // Handle joining game with cleaner error handling
+    const handleJoinGame = async () => {
+        if (sentRequest || !validateInputs()) {
+            console.log("Invalid inputs or request already sent");
             return;
         }
 
         setSentRequest(true);
+        const token = localStorage.getItem("token");
 
         try {
-            socket?.emit("join-game", { gameCode, username }, (response) => {
-                if(!response.success && response.error) {
-                    setGameError((prev) => ({ ...prev, error: response.error }));
-                    return;
+            socket?.emit(
+                "join-game",
+                { gameCode, username, token: token },
+                (response) => {
+                    console.log('join game response', response);
+                    if (response && !response.success) {
+                        setGameError((prev) => ({ ...prev, error: response.error || "Unknown error" }));
+                        setSentRequest(false);
+                        return;
+                    }
+
+                    if (response.isCreator) {
+                        setIsCreator(true);
+                    }
+
+                    localStorage.setItem("username", username);
+                    localStorage.setItem("token", response.token);
+                    localStorage.setItem("game", JSON.stringify(response.gameData));
+                    router.push(response.inQueue ? "/queue" : "/waiting", undefined, { shallow: true });
                 }
-
-                localStorage.setItem("username", username);
-                localStorage.setItem("token", response.token);
-                localStorage.setItem("game", JSON.stringify(response.gameData));
-
-                router.push(response.inQueue ? "/queue" : "/waiting", undefined, { shallow: true });
-            });
-        } catch (e) {
-            console.error(e);
+            );
+        } catch (error) {
+            console.error("Error joining game:", error);
+            setGameError((prev) => ({ ...prev, error: "Failed to join game" }));
         } finally {
             setSentRequest(false);
         }
     };
 
-    // auto join game if user has valid game data in local storage
-    useEffect(() => {
-        const localGameData = JSON.parse(localStorage.getItem("game") || null);
-        const storedUsername = localStorage.getItem("username") || 'creator';
-        const gameCode = localGameData?.gameSettings?.gameCode || null;
-    
-        if (!localGameData || !gameCode) return;
-        if (!socket) return;
-    
-        socket.emit("join-game", { gameCode, username: storedUsername }, (response) => {
+    const attemptAutoJoin = useCallback(() => {
+        if (!socket || isAlreadyInGame) {
+            console.log("Skipping auto-join: already in game or no socket");
+            return;
+        }
+
+        const localGameData = JSON.parse(localStorage.getItem("game") || "null");
+        const storedUsername = localStorage.getItem("username");
+        const token = localStorage.getItem("token");
+        const storedGameCode = localGameData?.gameSettings?.gameCode;
+
+        if (!localGameData || !storedGameCode || !storedUsername || !token) {
+            console.log("Missing required data, skipping auto-join");
+            return;
+        }
+
+        console.log("Attempting to join game with:", { gameCode: storedGameCode, username: storedUsername, token });
+
+        socket.emit("join-game", { gameCode: storedGameCode, username: storedUsername, token }, (response) => {
+            console.log('auto join game response', response);
             if (!response?.success) {
-                localStorage.removeItem("game");
-                localStorage.removeItem("username");
-                localStorage.removeItem("token");
+                if (response.error === "Player already in game") {
+                    setIsAlreadyInGame(true);
+                }
+                localStorage.clear();
                 return;
+            }
+
+            setIsAlreadyInGame(true); // Mark as in game after successful join
+            if (response.isCreator) {
+                setIsCreator(true);
             }
 
             localStorage.setItem("username", storedUsername);
             localStorage.setItem("token", response.token);
             localStorage.setItem("game", JSON.stringify(response.gameData));
-    
             router.push(response.inQueue ? "/queue" : "/waiting", undefined, { shallow: true });
         });
-    }, []);
+    }, [socket, isAlreadyInGame]); // Ensure all dependencies are listed
 
-    const isAuthHasError = () => gameError.login || gameError.code || gameError.error !== "";
+    useEffect(() => {
+        attemptAutoJoin();
+    }, [attemptAutoJoin]);
+
+
+    // Helper to check if there's an error
+    const hasError = gameError.login || gameError.code || gameError.error;
+
     return (
         <div className="text-black w-full md:w-1/2 xl:w-1/3 p-2 flex flex-col gap-3 justify-center rounded-md">
             <Kahoot />
-            <div className={`authUsername font-bold text-xl p-2 flex items-center justify-between border-8 ${!gameError.login ? 'border-green-500' : 'border-red-500 animate-pulse'} rounded-full`}>
-                <input
-                    className="bg-transparent w-full text-white placeholder:text-white px-2 focus:outline-none focus:placeholder:text-gray-400"
-                    type="text"
-                    id="username"
-                    placeholder="Username"
-                    onChange={(e) => onInputUpdate(e)}
-                    maxLength="15"
-                    required
+            <InputField
+                id="username"
+                placeholder="Username"
+                value={username}
+                onChange={onInputUpdate}
+                hasError={gameError.login}
+                maxLength={15}
+                Icon={RiUserReceived2Line}
+            />
+            <InputField
+                id="gameCode"
+                placeholder="Code"
+                value={gameCode}
+                onChange={onInputUpdate}
+                hasError={gameError.code}
+                Icon={MdOutlinePassword}
+            />
+            {hasError && (
+                <ErrorMessages
+                    loginError={gameError.login}
+                    codeError={gameError.code}
+                    generalError={gameError.error}
                 />
-                <RiUserReceived2Line className={`w-10 h-full ${!gameError.login ? 'text-green-500' : 'text-red-500'}`} />
-            </div>
-
-            <div className={`gameCode font-bold text-xl p-2 flex items-center justify-between border-8 ${!gameError.code ? 'border-green-500' : 'border-red-500 animate-pulse'} rounded-full`}>
-                <input
-                    className="bg-transparent w-full text-white placeholder:text-white px-2 focus:outline-none focus:placeholder:text-gray-400"
-                    type="text"
-                    id="gameCode"
-                    placeholder="Code"
-                    onChange={(e) => onInputUpdate(e)}
-                    required
-                />
-                <MdOutlinePassword className={`w-10 h-full ${!gameError.code ? 'text-green-500' : 'text-red-500'}`} />
-            </div>
-            {
-                isAuthHasError() &&
-                <div className="errorMessages text-white w-full text-center p-2 rounded-md bg-red-600/40">
-                    <div className="errorTitle mb-2 w-full font-bold border-b-[1px] border-gray-800/20">Something went wrong!</div>
-                    {gameError.login && <div className="errorText font-semibold py-1 text-md">Username is required!</div>}
-                    {gameError.code && <div className="errorText font-semibold py-1 text-md">Game code is required!</div>}
-                    {gameError.error && <div className="errorText font-semibold py-1 text-md">Game not found!</div>}
-                </div>
-            }
+            )}
             <div className="gameButtons flex flex-col md:flex-row justify-center gap-4 cursor-pointer">
                 <button
-                    className="bg-emerald-500 w-full lg:w-1/3 uppercase tracking-widest font-bold text-white p-2 rounded-md hover:scale-110 transform transition-all"
+                    className="bg-emerald-500 w-full lg:w-1/3 uppercase tracking-widest font-bold text-white p-2 rounded-md hover:scale-110 transform transition-all disabled:opacity-50"
                     disabled={sentRequest}
                     onClick={handleJoinGame}
                 >
@@ -139,11 +168,47 @@ export default function Home() {
                 </button>
                 <Link
                     href="/create"
-                    className="w-full lg:w-1/3 text-center uppercase tracking-widest p-2 rounded-md text-green-500 hover:bg-emerald-500 hover:text-white hover:scale-110 transform transition-all "
+                    className="w-full lg:w-1/3 text-center uppercase tracking-widest p-2 rounded-md text-green-500 hover:bg-emerald-500 hover:text-white hover:scale-110 transform transition-all"
                 >
                     <span className="font-bold">Create Game</span>
                 </Link>
             </div>
+        </div>
+    );
+}
+
+// Reusable Input Component
+function InputField({ id, placeholder, value, onChange, hasError, maxLength, Icon }) {
+    return (
+        <div
+            className={`font-bold text-xl p-2 flex items-center justify-between border-8 ${!hasError ? "border-green-500" : "border-red-500 animate-pulse"
+                } rounded-full`}
+        >
+            <input
+                className="bg-transparent w-full text-white placeholder:text-white px-2 focus:outline-none focus:placeholder:text-gray-400"
+                type="text"
+                id={id}
+                placeholder={placeholder}
+                value={value}
+                onChange={onChange}
+                maxLength={maxLength}
+                required
+            />
+            <Icon className={`w-10 h-full ${!hasError ? "text-green-500" : "text-red-500"}`} />
+        </div>
+    );
+}
+
+// Reusable Error Messages Component
+function ErrorMessages({ loginError, codeError, generalError }) {
+    return (
+        <div className="errorMessages text-white w-full text-center p-2 rounded-md bg-red-600/40">
+            <div className="errorTitle mb-2 w-full font-bold border-b-[1px] border-gray-800/20">
+                Something went wrong!
+            </div>
+            {loginError && <div className="errorText font-semibold py-1 text-md">Username is required!</div>}
+            {codeError && <div className="errorText font-semibold py-1 text-md">Game code is required!</div>}
+            {generalError && <div className="errorText font-semibold py-1 text-md">{generalError}</div>}
         </div>
     );
 }

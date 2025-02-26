@@ -8,25 +8,13 @@ import { QuestionAction } from "../utils/question";
 import { useRouter } from "next/navigation";
 
 export default function Game() {
-  const [isCreator, setIsCreator] = useState(null);
 
   const [gameQuestion, setGameQuestion] = useState(null);
   const [gameOptions, setGameOptions] = useState([]);
   const [gameTimer, setGameTimer] = useState(null);
-  const socket = useContext(SocketContext);
+  const { socket, isCreator } = useContext(SocketContext);
   const router = useRouter();
 
-  useEffect(() => {
-    const gameData = JSON.parse(localStorage.getItem("game"));
-
-    if (gameData) {
-      // Compare creator socket with client socket.id
-      const isCreatorSocketEqual = gameData.gameid === socket.id;
-      setIsCreator(isCreatorSocketEqual);
-    } else {
-      console.error("No game data found in localStorage.");
-    }
-  }, []);
 
   // Function to fetch the next question, used by the creator
   const fetchNextQuestion = (increment = QuestionAction.MAINTAIN) => {
@@ -34,10 +22,14 @@ export default function Game() {
     const gameId = gameData?.gameid;
 
     socket?.emit("emit-question", gameId, increment, (data) => {
-      const { question, options } = data.server;
+      try {
+        const { question, options } = data.server;
 
-      setGameQuestion(question);
-      setGameOptions(options);
+        setGameQuestion(question);
+        setGameOptions(options);
+      } catch (error) {
+        console.error("Error fetching next question", error);
+      }
     });
   };
 
@@ -69,7 +61,7 @@ export default function Game() {
   }, []);
 
   // redirect to rejoin if there is data if not redirect to home
-  if(localStorage.getItem("game") === null) {
+  if (localStorage.getItem("game") === null) {
     router.push("/");
     return null;
   }

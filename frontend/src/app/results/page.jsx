@@ -5,7 +5,6 @@ import { SocketContext } from "../context/socket";
 import {
   getCorrectAnswers,
   getCorrectPercentage,
-  isGameCreator,
 } from "../utils/player";
 import { Kahoot } from "../components/title";
 import { ProgressBar } from "../components/progressbar";
@@ -16,8 +15,7 @@ export default function Results() {
     const savedGame = localStorage.getItem("game");
     return savedGame ? JSON.parse(savedGame) : null;
   });
-  const socket = useContext(SocketContext);
-  const isCreator = isGameCreator(socket.id);
+  const {socket, isCreator} = useContext(SocketContext);
 
   useEffect(() => {
     if (gameData) {

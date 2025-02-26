@@ -3,15 +3,13 @@
 import { useRouter } from "next/navigation";
 import { useContext } from "react";
 import { SocketContext } from "@/app/context/socket";
-import { isGameCreator } from "@/app/utils/player";
 import { twMerge } from "tailwind-merge";
 
 export const LeaveGame = ({ className, text = "Leave Game" }) => {
   const router = useRouter();
-  const socket = useContext(SocketContext);
+  const {socket, isCreator} = useContext(SocketContext);
 
   const handleLeaveGame = () => {
-    const isCreator = isGameCreator(socket?.id);
 
     if (isCreator) {
       socket?.emit("server-cancel-game");

@@ -1,11 +1,3 @@
-
-import { v4 as uuidv4 } from 'uuid';
-
-
-export const generatePlayerUuid = () => {
-    return uuidv4();
-}
-
 export const getPlayerBySocket = (socketId) => {
     const localGameData = JSON.parse(localStorage.getItem("game"));
     const player = localGameData.players.find((player) => player.socket === socketId);
@@ -35,12 +27,6 @@ export const updatePlayersAnswers = (playerList) => {
     });
 
     return playerList;
-}
-
-export const isGameCreator = (socket) => {
-    const localGameData = JSON.parse(localStorage.getItem("game"));
-
-    return localGameData?.gameid === socket;
 }
 
 export const getCorrectPercentage = (player) => {

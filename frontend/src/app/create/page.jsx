@@ -9,9 +9,9 @@ import { TbJson } from "react-icons/tb";
 import { Codesnippet } from "@/app/components/codesnippet";
 
 import { generateGameId } from "@/app/utils/game";
-import { SocketContext } from "@/app/context/socket";
 
 import './style.css';
+import { SocketContext } from "../context/socket";
 
 export default function CreateNewGame() {
     const [gameErrors, setGameErrors] = useState({
@@ -32,7 +32,7 @@ export default function CreateNewGame() {
     });
     const [sendedRequest, setSendedRequest] = useState(false);
 
-    const socket = useContext(SocketContext);
+    const { socket, setIsCreator } = useContext(SocketContext);
     const router = useRouter();
 
     const generateGameCode = () => {
@@ -138,11 +138,23 @@ export default function CreateNewGame() {
             if (response.data.success) {
                 const newGameSettings = {
                     ...gameSettings,
-                    totalQuestions: response.data.data.game.length,
+                    questions: response.data.data.game, // Array of questions
+                    totalQuestions: response.data.data.game.length, // Total number of questions
                 };
                 setGameSettings(newGameSettings);
 
                 socket.emit("create-game", newGameSettings, (response) => {
+                    console.log('create-game reponse: ', response);
+                    if (!response.success) {
+                        setGameErrors({ ...gameErrors, fileType: response.message });
+                        setSendedRequest(false);
+                        return;
+                    }
+
+                    if(response.isCreator) {
+                        setIsCreator(true);
+                    }
+
                     localStorage.setItem("game", JSON.stringify(response?.gameData));
                     localStorage.setItem("username", gameSettings.creator);
                     localStorage.setItem("token", response.token);

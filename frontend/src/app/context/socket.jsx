@@ -1,108 +1,60 @@
 "use client";
 
-import { createContext, useEffect, useState, useCallback } from "react";
+import { createContext, useState, useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 import { useRouter } from "next/navigation";
-import { generatePlayerUuid, isGameCreator } from "../utils/player";
-import { useBeforeUnload } from "react-router-dom";
+import {
+    handleCancelGame,
+    onPlayerJoinGame,
+    onPlayerLeaveGame,
+} from "@/app/utils/socket";
 
-export const SocketContext = createContext(null);
+
+export const SocketContext = createContext();
 
 export default function SocketProvider({ children }) {
     const [socket, setSocket] = useState(null);
     const router = useRouter();
-    const [userToken, setUserToken] = useState(null);
+    const [isCreator, setIsCreator] = useState(false);
+    const socketRef = useRef(null); // Cache the socket instance
 
+    // Initialize socket only once
     useEffect(() => {
-        const newSocket = io(process.env.SOCKET_URL);
-        setSocket(newSocket);
+        if (!socketRef.current) {
+            const newSocket = io(process.env.SOCKET_URL);
+            socketRef.current = newSocket;
+            setSocket(newSocket);
 
-        //generate uuid token for user
-        const token = generatePlayerUuid();
-        setUserToken(token);
-        sessionStorage.setItem("token", token);
+            // Cleanup on unmount
+            return () => {
+                newSocket.disconnect();
+            };
+        }
+    }, []); // Empty dependency array ensures this runs only once
 
-        return () => {
-            newSocket.disconnect();
-        };
-    }, []);
-
+    // Set up event listeners when socket is available
     useEffect(() => {
-        const handleCancelGame = () => {
-            alert("Game has been canceled, redirecting to the home page.");
+        if (!socket) return;
 
-            // Clear the local storage
-            localStorage.removeItem("game");
-            localStorage.removeItem("username");
-            localStorage.removeItem("socket");
+        socket.on("client-cancel-game", handleCancelGame);
+        socket.on("player-join", onPlayerJoinGame);
+        socket.on("player-left", onPlayerLeaveGame);
 
-            // Redirect to the home page
-            router.push("/");
-        };
-
-        const handleJoinGame = (player) => {
-            let localGameData = JSON.parse(localStorage.getItem("game"));
-
-            if (!localGameData || !localGameData.players) {
-                console.error("No game data found or players array is missing.");
-                return;
-            }
-
-            localGameData.players.push(player);
-            localStorage.setItem("game", JSON.stringify(localGameData));
-            
-            // Dispatch event to notify about the update
-            const event = new Event("updateGamePlayers");
-            window.dispatchEvent(event);
-        };
-
-        const handlePlayerLeft = (playerData) => {
-            let localGameData = JSON.parse(localStorage.getItem("game"));
-
-            if (!localGameData || !localGameData.players) {
-                console.error("No game data found or players array is missing.");
-                return;
-            }
-
-            // Filter out the player who left
-            const updatedPlayers = localGameData.players.filter(
-                (player) => player.socket !== playerData.socket
-            );
-            localGameData = { ...localGameData, players: updatedPlayers };
-
-            // Update localStorage with the player removed
-            localStorage.setItem("game", JSON.stringify(localGameData));
-
-            // Dispatch event to notify about the update
-            const event = new Event("updateGamePlayers");
-            window.dispatchEvent(event);
-        };
-
-        socket?.on("client-cancel-game", handleCancelGame);
-        socket?.on("player-join", handleJoinGame);
-        socket?.on("player-left", handlePlayerLeft);
-
+        // Cleanup event listeners
         return () => {
-            socket?.off("client-cancel-game", handleCancelGame);
-            socket?.off("player-join", handleJoinGame);
-            socket?.off("player-left", handlePlayerLeft);
+            socket.off("client-cancel-game", handleCancelGame);
+            socket.off("player-join", onPlayerJoinGame);
+            socket.off("player-left", onPlayerLeaveGame);
         };
-    }, [socket]);
-
-    useBeforeUnload(
-        useCallback(() => {
-            const isCreator = isGameCreator(socket?.id);
-            if (!isCreator) return;
-
-            // socket?.emit("server-cancel-game");
-        }, [socket])
-    );
+    }, [socket, router]);
 
     if (!socket) {
-        return null; // Or a loading spinner or placeholder
+        return null;
     }
 
     return (
-        <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>
+        <SocketContext.Provider value={{ socket, isCreator, setIsCreator }}>
+            {children}
+        </SocketContext.Provider>
     );
 }

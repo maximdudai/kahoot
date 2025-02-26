@@ -5,7 +5,7 @@ const nextConfig = {
   env: {
     SOCKET_URL: isProduction ? "https://kahoot.pro/" : "http://localhost:4000/",
   },
-  reactStrictMode: true,
+  reactStrictMode: false,
   poweredByHeader: false,
   productionBrowserSourceMaps: false,
 };
