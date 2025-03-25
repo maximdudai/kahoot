@@ -12,7 +12,8 @@ export const LeaveGame = ({ className, text = "Leave Game" }) => {
   const handleLeaveGame = () => {
 
     if (isCreator) {
-      socket?.emit("server-cancel-game");
+      const token = localStorage.getItem("token") || "";
+      socket?.emit("server-cancel-game", token);
     } else {
       socket?.emit("leave-game");
 

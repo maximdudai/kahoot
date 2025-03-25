@@ -48,7 +48,8 @@ export default function Results() {
   }, [socket, gameData]);
 
   const handleEndGame = () => {
-    socket?.emit("server-cancel-game");
+    const token = localStorage.getItem("token") || "";
+    socket?.emit("server-cancel-game", token);
   };
 
   return (

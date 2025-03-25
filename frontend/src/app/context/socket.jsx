@@ -16,7 +16,7 @@ export default function SocketProvider({ children }) {
     const [socket, setSocket] = useState(null);
     const router = useRouter();
     const [isCreator, setIsCreator] = useState(false);
-    const socketRef = useRef(null); // Cache the socket instance
+    const socketRef = useRef(null);
 
     // Initialize socket only once
     useEffect(() => {
@@ -30,9 +30,8 @@ export default function SocketProvider({ children }) {
                 newSocket.disconnect();
             };
         }
-    }, []); // Empty dependency array ensures this runs only once
+    }, []);
 
-    // Set up event listeners when socket is available
     useEffect(() => {
         if (!socket) return;
 

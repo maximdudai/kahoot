@@ -32,13 +32,13 @@ export default (io) => {
             EmitEventOnDisconnect(io, socket);
         });
 
-        socket.on('server-cancel-game', () => {
-            cancelGame(io, socket.id);
+        socket.on('server-cancel-game', (gameid) => {
+            cancelGame(io, gameid);
         });
 
         // game events
-        socket.on('start-game', () => {
-            startGame(io, socket.id);
+        socket.on('start-game', (gameid) => {
+            startGame(io, gameid);
         })
 
         socket.on('emit-question', (gameid, increment, callback) => {
@@ -162,11 +162,12 @@ function joinGame(io, socket, data, callback) {
             isCreator = true;
         }
 
+        const addPlayerInQueue = !isCreator && gameTimer[gameData.gameid] !== null;
         callback({
             success: true,
             isCreator,
             gameData: newGameData,
-            inQueue: (!isCreator && gameTimer[gameData.gameid] !== null),
+            inQueue: addPlayerInQueue,
             token: playerUuid
         });
     } catch (error) {
@@ -293,30 +294,29 @@ function findPlayerByUuid(game, uuid) {
 
 function startGame(io, gameid) {
     try {
-        const game = findGameById(gameid);
 
-        if (!game)
+        if (!gameid)
             return;
 
-        io.to(game.gameid.toString()).emit('creator-start-game');
-        startGameTimer(io, game.gameid);
-
+        io.to(gameid.toString()).emit('creator-start-game');
+        startGameTimer(io, gameid);
     } catch (error) {
         console.error(error);
     }
 }
 
 function startGameTimer(io, gameId) {
-    const game = findGameById(gameId);
 
-    if (!game)
+    if (!gameId)
         return;
+
 
     if (gameInterval[gameId]) {
         clearInterval(gameInterval[gameId]);
         gameTimer[gameId] = null;
     }
 
+    const game = findGameById(gameId);
     gameTimer[gameId] = game.gameSettings.time;
 
     // Save the interval in the game object so we can clear it later if needed

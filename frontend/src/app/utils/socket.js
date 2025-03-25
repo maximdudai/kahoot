@@ -1,10 +1,6 @@
-import { v4 as uuidv4 } from 'uuid';
-
 export const handleCancelGame = (router) => {
     alert("Game has been canceled, redirecting to the home page.");
-    localStorage.removeItem("game");
-    localStorage.removeItem("username");
-    localStorage.removeItem("socket");
+    localStorage.clear();
     router.push("/");
 };
 

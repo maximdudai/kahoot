@@ -73,7 +73,7 @@ export const CreatorScreen = ({ question, options, timer, handleNextQuestion }) 
           <Timer timer={timer} />
         </div>
 
-        <div className="creatorAcess w-full p-2 md:p-0 md:w-1/3 flex flex-col gap-2">
+        <div className="creatorAcess w-full p-2 md:p-0 md:w-[45%] lg:w-1/3 flex flex-col gap-2">
           <LeaveGame className={"bg-blue-500 p-2 rounded-md shadow-lg hover:bg-blue-500/80"} text="End Game" />
           <button className="bg-blue-500 p-2 rounded-md shadow-lg hover:bg-blue-500/80"
             onClick={handleIncreaseTimer}

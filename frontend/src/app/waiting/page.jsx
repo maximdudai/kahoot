@@ -14,8 +14,6 @@ export default function WaitingPlayers() {
     const { socket, isCreator } = useContext(SocketContext);
 
     useEffect(() => {
-        if (!socket)
-            return;
 
         socket.on("creator-start-game", () => {
 
@@ -28,7 +26,12 @@ export default function WaitingPlayers() {
     }, []);
 
     const handleStartGame = () => {
-        socket?.emit("start-game");
+        const token = localStorage.getItem("token");
+        if (!token) {
+            router.push("/login");
+            return;
+        }
+        socket?.emit("start-game", token);
 
         router.push("/game", undefined, { shallow: true });
     };
