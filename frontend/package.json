@@ -26,6 +26,7 @@
     "@types/react": "19.1.12",
     "@types/stylis": "^4.2.6",
     "@types/unist": "^3.0.2",
+    "classnames": "^2.5.1",
     "eslint": "^8",
     "eslint-config-next": "14.2.5",
     "postcss": "^8",

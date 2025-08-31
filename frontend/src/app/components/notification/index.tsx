@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import { IoCloseCircleOutline } from "react-icons/io5";
 import { styleByPosition, styleByType } from "./tools";
 import { NotificationPosition, NotificationProps } from "./types";
 
-export const Notification = ({
+export const Notification = memo(({
     message,
     type,
     duration = 3000,
@@ -41,4 +41,4 @@ export const Notification = ({
             </button>}
         </div>
     )
-}
+});

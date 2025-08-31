@@ -12,6 +12,8 @@ import { generateGameId } from "@/app/utils/game";
 
 import './style.css';
 import { SocketContext } from "../context/socket";
+import { Input } from "../components/input";
+import { InputType } from "../components/input/types";
 
 export default function CreateNewGame() {
     const [gameErrors, setGameErrors] = useState({
@@ -85,7 +87,7 @@ export default function CreateNewGame() {
 
     const handleGameCodeInput = (e) => {
         let code = e.target.value;
-        
+
         if (gameErrors.code) {
             setGameErrors({ ...gameErrors, code: "" });
         }
@@ -149,7 +151,7 @@ export default function CreateNewGame() {
                         return;
                     }
 
-                    if(response.isCreator) {
+                    if (response.isCreator) {
                         setIsCreator(true);
                     }
 
@@ -183,9 +185,9 @@ export default function CreateNewGame() {
                 </h1>
 
                 <div className={`creatorNickname my-2 h-[3.5rem] p-2 flex items-center justify-between border-2 ${!gameErrors.nickname ? 'border-gray-600' : 'border-red-500 animate-pulse'} rounded-lg bg-gray-800/50 hover:bg-gray-800 transition-all`}>
-                    <input
+                    <Input
                         className="bg-transparent w-full text-white placeholder:text-gray-300 focus:outline-none focus:placeholder:text-gray-400 font-bungee text-sm"
-                        type="text"
+                        type={InputType.Text}
                         maxLength={20}
                         id="nickname"
                         placeholder="Enter Nickname"
@@ -194,10 +196,10 @@ export default function CreateNewGame() {
                 </div>
 
                 <div className={`generateGameCode my-2 p-2 flex items-center justify-between border-2 ${!gameErrors.code ? 'border-gray-600' : 'border-red-500 animate-pulse'} rounded-lg bg-gray-800/50 hover:bg-gray-800 transition-all`}>
-                    <input
+                    <Input
                         className="bg-transparent w-full text-white placeholder:text-gray-300 focus:outline-none focus:placeholder:text-gray-400 no-arrows font-press-start text-sm"
                         maxLength={6}
-                        type="number"
+                        type={InputType.Number}
                         id="gamecode"
                         placeholder="Game Code"
                         value={gameSettings.gameCode}
@@ -231,8 +233,8 @@ export default function CreateNewGame() {
                                 <div className="singlePlayer h-12 flex justify-between text-white uppercase items-center bg-gray-700/50 my-2 px-4 rounded-lg hover:bg-gray-600 transition-all">
 
                                     <label htmlFor="single" className="font-press-start text-sm">Singleplayer</label>
-                                    <input
-                                        type="radio"
+                                    <Input
+                                        type={InputType.Number}
                                         id="single"
                                         name="maxPlayers"
                                         value="1"
@@ -245,20 +247,20 @@ export default function CreateNewGame() {
                                         <span className="font-press-start text-sm">Unlimited</span>
                                         <span className="text-xs px-2 bg-yellow-500 text-black rounded-full">Default</span>
                                     </label>
-                                    <input
-                                        type="radio"
+                                    <Input
+                                        type={InputType.Radio}
                                         id="unlimited"
                                         name="maxPlayers"
                                         value="-1"
                                         onChange={(e) => setGameSettings({ ...gameSettings, maxPlayers: Number(e.target.value) })}
-                                        defaultChecked
+                                        checked={gameSettings.maxPlayers === -1}
                                     />
                                 </div>
 
                                 <div className="10players h-12 flex justify-between text-white uppercase items-center bg-gray-700/50 my-2 px-4 rounded-lg hover:bg-gray-600 transition-all">
                                     <label htmlFor="10player" className="font-press-start text-sm">10 Players</label>
-                                    <input
-                                        type="radio"
+                                    <Input
+                                        type={InputType.Radio}
                                         id="10player"
                                         name="maxPlayers"
                                         value="10"
@@ -267,8 +269,8 @@ export default function CreateNewGame() {
                                 </div>
                                 <div className="20players h-12 flex justify-between text-white uppercase items-center bg-gray-700/50 my-2 px-4 rounded-lg hover:bg-gray-600 transition-all">
                                     <label htmlFor="20player" className="font-press-start text-sm">20 Players</label>
-                                    <input
-                                        type="radio"
+                                    <Input
+                                        type={InputType.Radio}
                                         id="20player"
                                         name="maxPlayers"
                                         value="20"
@@ -288,8 +290,8 @@ export default function CreateNewGame() {
                             <div className="totalTime">
                                 <div className="unlimitedTime h-12 flex justify-between text-white uppercase items-center bg-gray-700/50 my-2 px-4 rounded-lg hover:bg-gray-600 transition-all">
                                     <label htmlFor="unlimited" className="font-press-start text-sm">Unlimited</label>
-                                    <input
-                                        type="radio"
+                                    <Input
+                                        type={InputType.Radio}
                                         id="unlimited"
                                         name="timePerQuestion"
                                         value="-1"
@@ -301,20 +303,20 @@ export default function CreateNewGame() {
                                         <span className="font-press-start text-sm">30 Seconds</span>
                                         <span className="text-xs px-2 bg-yellow-500 text-black rounded-full">Default</span>
                                     </label>
-                                    <input
-                                        type="radio"
+                                    <Input
+                                        type={InputType.Radio}
                                         id="30seconds"
                                         name="timePerQuestion"
                                         value="30"
                                         onChange={(e) => setGameSettings({ ...gameSettings, time: Number(e.target.value) })}
-                                        defaultChecked
+                                        checked={gameSettings.time === 30}
                                     />
                                 </div>
 
                                 <div className="45seconds h-12 flex justify-between text-white uppercase items-center bg-gray-700/50 my-2 px-4 rounded-lg hover:bg-gray-600 transition-all">
                                     <label htmlFor="45seconds" className="font-press-start text-sm">45 Seconds</label>
-                                    <input
-                                        type="radio"
+                                    <Input
+                                        type={InputType.Radio}
                                         id="45seconds"
                                         name="timePerQuestion"
                                         value="45"
@@ -324,8 +326,8 @@ export default function CreateNewGame() {
 
                                 <div className="60seconds h-12 flex justify-between text-white uppercase items-center bg-gray-700/50 my-2 px-4 rounded-lg hover:bg-gray-600 transition-all">
                                     <label htmlFor="60seconds" className="font-press-start text-sm">60 Seconds</label>
-                                    <input
-                                        type="radio"
+                                    <Input
+                                        type={InputType.Radio}
                                         id="60seconds"
                                         name="timePerQuestion"
                                         value="60"
@@ -344,11 +346,11 @@ export default function CreateNewGame() {
                     </h3>
 
                     <div className={`questions my-2 p-2 flex items-center justify-between border-2 ${!gameErrors.file ? 'border-gray-600' : 'border-red-500 animate-pulse'} rounded-lg bg-gray-800/50 hover:bg-gray-800 transition-all`}>
-                        <input
+                        <Input
                             className="cursor-pointer text-white file:mr-4 file:rounded-full file:border-0 file:bg-green-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-green-600 dark:file:bg-green-600 dark:file:text-white"
-                            type="file"
+                            type={InputType.File}
                             id="questions"
-                            accept=".json"
+                            acceptFileTypes=".json"
                             onChange={handleFileChange}
                             required
                         />
