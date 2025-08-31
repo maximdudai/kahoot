@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { useContext } from "react";
 import Link from "next/link";
-import { RiUserReceived2Line } from "react-icons/ri";
+import { useRouter } from "next/navigation";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { MdOutlinePassword } from "react-icons/md";
+import { RiUserReceived2Line } from "react-icons/ri";
 import { Kahoot } from "./components/title";
 import { SocketContext } from "./context/socket";
-import { MAX_GAME_CODE_LENGTH } from "./utils/game";
+import { clearData, getData, MAX_GAME_CODE_LENGTH, saveData } from "./utils/game";
+import { Input } from "./components/input";
 
 export default function Home() {
     const [username, setUsername] = useState("");
@@ -87,9 +87,9 @@ export default function Home() {
             return;
         }
 
-        const localGameData = JSON.parse(localStorage.getItem("game") || "null");
-        const storedUsername = localStorage.getItem("username");
-        const token = localStorage.getItem("token");
+        const localGameData = getData("game");
+        const storedUsername = getData("username");
+        const token = getData("token");
         const storedGameCode = localGameData?.gameSettings?.gameCode;
 
         if (!localGameData || !storedGameCode || !storedUsername || !token) {
@@ -101,7 +101,7 @@ export default function Home() {
                 if (response.error === "Player already in game") {
                     setIsAlreadyInGame(true);
                 }
-                localStorage.clear();
+                clearData();
                 return;
             }
 
@@ -110,9 +110,9 @@ export default function Home() {
                 setIsCreator(true);
             }
 
-            localStorage.setItem("username", storedUsername);
-            localStorage.setItem("token", response.token);
-            localStorage.setItem("game", JSON.stringify(response.gameData));
+            saveData("username", storedUsername);
+            saveData("token", response.token);
+            saveData("game", response.gameData);
             router.push(response.inQueue ? "/queue" : "/waiting");
         });
     }, [socket, isAlreadyInGame]); // Ensure all dependencies are listed
@@ -128,29 +128,29 @@ export default function Home() {
     return (
         <div className="text-black w-full md:w-1/2 xl:w-1/3 p-2 flex flex-col gap-3 justify-center rounded-md">
             <Kahoot />
-            <InputField
+            <Input
                 id="username"
                 placeholder="Username"
                 value={username}
                 onChange={onInputUpdate}
-                hasError={gameError.login}
+                hasError={!!gameError.login}
                 maxLength={15}
                 Icon={RiUserReceived2Line}
             />
-            <InputField
+            <Input
                 id="gameCode"
                 placeholder="Code"
                 value={gameCode}
                 onChange={onInputUpdate}
-                hasError={gameError.code}
+                hasError={!!gameError.code}
                 Icon={MdOutlinePassword}
                 maxLength={MAX_GAME_CODE_LENGTH}
             />
             {hasError && (
                 <ErrorMessages
-                    loginError={gameError.login}
-                    codeError={gameError.code}
-                    generalError={gameError.error}
+                    loginError={!!gameError.login}
+                    codeError={!!gameError.code}
+                    generalError={!!gameError.error}
                 />
             )}
             <div className="gameButtons flex flex-col md:flex-row justify-center gap-4 cursor-pointer">
@@ -172,27 +172,7 @@ export default function Home() {
     );
 }
 
-// Reusable Input Component
-function InputField({ id, placeholder, value, onChange, hasError, maxLength, Icon }) {
-    return (
-        <div
-            className={`font-bold text-xl p-2 flex items-center justify-between border-8 ${!hasError ? "border-green-500" : "border-red-500 animate-pulse"
-                } rounded-full`}
-        >
-            <input
-                className="bg-transparent w-full text-white placeholder:text-white px-2 focus:outline-none focus:placeholder:text-gray-400"
-                type="text"
-                id={id}
-                placeholder={placeholder}
-                value={value}
-                onChange={onChange}
-                maxLength={maxLength}
-                required
-            />
-            <Icon className={`w-10 h-full ${!hasError ? "text-green-500" : "text-red-500"}`} />
-        </div>
-    );
-}
+
 
 // Reusable Error Messages Component
 function ErrorMessages({ loginError, codeError, generalError }) {
