@@ -5,8 +5,12 @@ export const generateGameId = () => {
   return code;
 }
 
-export const saveData = (key: string, value: any) => {
-  localStorage.setItem(key, JSON.stringify(value));
+export const saveData = (item: any | any[]) => {
+  if (Array.isArray(item)) {
+    item.forEach((i) => localStorage.setItem(i.toString(), JSON.stringify(i)));
+  } else {
+    localStorage.setItem(item.toString(), JSON.stringify(item));
+  }
 }
 
 export const getData = (key?: string) => {

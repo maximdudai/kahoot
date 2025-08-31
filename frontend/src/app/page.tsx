@@ -104,15 +104,18 @@ export default function Home() {
                 clearData();
                 return;
             }
+            const { gameData, token } = response;
 
             setIsAlreadyInGame(true); // Mark as in game after successful join
             if (response.isCreator) {
                 setIsCreator(true);
             }
 
-            saveData("username", storedUsername);
-            saveData("token", response.token);
-            saveData("game", response.gameData);
+            saveData({
+                username: storedUsername,
+                token,
+                game: gameData
+            });
             router.push(response.inQueue ? "/queue" : "/waiting");
         });
     }, [socket, isAlreadyInGame]); // Ensure all dependencies are listed
