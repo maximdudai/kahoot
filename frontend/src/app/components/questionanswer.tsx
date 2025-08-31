@@ -1,7 +1,13 @@
 import { useState, useContext, useEffect } from "react";
 import { SocketContext } from "../context/socket";
 
-export const QuestionAnswer = ({ question, options, disabled = false }) => {
+type QuestionAnswerProps = {
+  question: string;
+  options: Array<string | { [key: string]: string }>;
+  disabled?: boolean;
+};
+
+export const QuestionAnswer = ({ question, options, disabled = false }: QuestionAnswerProps) => {
   const {socket, isCreator} = useContext(SocketContext);
   const [response, setResponse] = useState(null);
   const [hints, setHints] = useState([]);
@@ -62,7 +68,7 @@ export const QuestionAnswer = ({ question, options, disabled = false }) => {
           {getUpdatedOptionsWithHints()?.map((option, index) => (
             <li
               key={index}
-              id={index}
+              id={index.toString()}
               onClick={() => handleResponse(index)}
               className={`w-full min-h-20 flex flex-col justify-center border-2 border-gray-800 rounded-md shadow-md text-lg p-2 
               ${option.isHint ? "bg-red-500" : "bg-blue-600"} 

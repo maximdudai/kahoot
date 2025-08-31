@@ -4,7 +4,13 @@ import { LeaveGame } from "@/app/components/leavegame";
 import { Timer } from "@/app/components/timer";
 import { QuestionAnswer } from "@/app/components/questionanswer";
 
-export const PlayerScreen = ({ question, options, timer }) => {
+type PlayerScreenProps = {
+  question: string;
+  options: string[];
+  timer: number;
+};
+
+export const PlayerScreen = ({ question, options, timer }: PlayerScreenProps) => {
   return (
     <div className="container flex flex-col gap-2">
       <div className="bg-white/30 text-white rounded-md">
@@ -15,7 +21,7 @@ export const PlayerScreen = ({ question, options, timer }) => {
         <QuestionAnswer
           question={question}
           options={options}
-          disabled={timer === "--"}
+          disabled={timer.toLocaleString().includes("--")}
         />
       </div>
 

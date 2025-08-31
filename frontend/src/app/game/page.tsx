@@ -50,7 +50,7 @@ export default function Game() {
     });
 
     socket.on("end-game", () => {
-      router.push("/results", undefined, { shallow: true });
+      router.push("/results");
     });
 
     return () => {

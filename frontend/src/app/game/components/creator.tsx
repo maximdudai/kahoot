@@ -8,7 +8,14 @@ import { QuestionAction } from "@/app/utils/question";
 import { updatePlayersAnswers } from "@/app/utils/player";
 import { LeaveGame } from "@/app/components/leavegame";
 
-export const CreatorScreen = ({ question, options, timer, handleNextQuestion }) => {
+type CreatorScreenProps = {
+  question: string;
+  options: string[];
+  timer: number;
+  handleNextQuestion: (action: QuestionAction) => void;
+};
+
+export const CreatorScreen = ({ question, options, timer, handleNextQuestion }: CreatorScreenProps) => {
   const [playerList, setPlayerList] = useState([]);
   const {socket} = useContext(SocketContext);
 

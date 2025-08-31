@@ -45,7 +45,6 @@ export default function CreateNewGame() {
         try {
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 await navigator.clipboard.writeText(gameSettings.gameCode);
-                console.log("Game code copied to clipboard");
             } else {
                 throw new Error("Clipboard API not supported");
             }
@@ -144,7 +143,6 @@ export default function CreateNewGame() {
                 setGameSettings(newGameSettings);
 
                 socket.emit("create-game", newGameSettings, (response) => {
-                    console.log('create-game reponse: ', response);
                     if (!response.success) {
                         setGameErrors({ ...gameErrors, fileType: response.message });
                         setSendedRequest(false);
@@ -161,9 +159,9 @@ export default function CreateNewGame() {
                 });
 
                 //redirect to waiting page
-                router.push("/waiting", undefined, { shallow: true });
+                router.push("/waiting");
             } else {
-                setGameCode({ ...gameErrors, fileType: response.data.message });
+                setGameErrors({ ...gameErrors, fileType: response.data.message });
             }
         } catch (error) {
             console.error("Error creating game:", error);
@@ -238,7 +236,7 @@ export default function CreateNewGame() {
                                         id="single"
                                         name="maxPlayers"
                                         value="1"
-                                        onChange={(e) => setGameSettings({ ...gameSettings, maxPlayers: e.target.value })}
+                                        onChange={(e) => setGameSettings({ ...gameSettings, maxPlayers: Number(e.target.value) })}
                                     />
 
                                 </div>
@@ -252,7 +250,7 @@ export default function CreateNewGame() {
                                         id="unlimited"
                                         name="maxPlayers"
                                         value="-1"
-                                        onChange={(e) => setGameSettings({ ...gameSettings, maxPlayers: e.target.value })}
+                                        onChange={(e) => setGameSettings({ ...gameSettings, maxPlayers: Number(e.target.value) })}
                                         defaultChecked
                                     />
                                 </div>
@@ -264,7 +262,7 @@ export default function CreateNewGame() {
                                         id="10player"
                                         name="maxPlayers"
                                         value="10"
-                                        onChange={(e) => setGameSettings({ ...gameSettings, maxPlayers: e.target.value })}
+                                        onChange={(e) => setGameSettings({ ...gameSettings, maxPlayers: Number(e.target.value) })}
                                     />
                                 </div>
                                 <div className="20players h-12 flex justify-between text-white uppercase items-center bg-gray-700/50 my-2 px-4 rounded-lg hover:bg-gray-600 transition-all">
@@ -274,7 +272,7 @@ export default function CreateNewGame() {
                                         id="20player"
                                         name="maxPlayers"
                                         value="20"
-                                        onChange={(e) => setGameSettings({ ...gameSettings, maxPlayers: e.target.value })}
+                                        onChange={(e) => setGameSettings({ ...gameSettings, maxPlayers: Number(e.target.value) })}
                                     />
                                 </div>
                             </div>
@@ -295,7 +293,7 @@ export default function CreateNewGame() {
                                         id="unlimited"
                                         name="timePerQuestion"
                                         value="-1"
-                                        onChange={(e) => setGameSettings({ ...gameSettings, time: e.target.value })}
+                                        onChange={(e) => setGameSettings({ ...gameSettings, time: Number(e.target.value) })}
                                     />
                                 </div>
                                 <div className="30seconds h-12 flex justify-between text-white uppercase items-center bg-gray-700/50 my-2 px-4 rounded-lg hover:bg-gray-600 transition-all">
@@ -308,7 +306,7 @@ export default function CreateNewGame() {
                                         id="30seconds"
                                         name="timePerQuestion"
                                         value="30"
-                                        onChange={(e) => setGameSettings({ ...gameSettings, time: e.target.value })}
+                                        onChange={(e) => setGameSettings({ ...gameSettings, time: Number(e.target.value) })}
                                         defaultChecked
                                     />
                                 </div>
@@ -320,7 +318,7 @@ export default function CreateNewGame() {
                                         id="45seconds"
                                         name="timePerQuestion"
                                         value="45"
-                                        onChange={(e) => setGameSettings({ ...gameSettings, time: e.target.value })}
+                                        onChange={(e) => setGameSettings({ ...gameSettings, time: Number(e.target.value) })}
                                     />
                                 </div>
 
@@ -331,7 +329,7 @@ export default function CreateNewGame() {
                                         id="60seconds"
                                         name="timePerQuestion"
                                         value="60"
-                                        onChange={(e) => setGameSettings({ ...gameSettings, time: e.target.value })}
+                                        onChange={(e) => setGameSettings({ ...gameSettings, time: Number(e.target.value) })}
                                     />
                                 </div>
                             </div>

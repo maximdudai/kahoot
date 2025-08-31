@@ -8,6 +8,7 @@ import { RiUserReceived2Line } from "react-icons/ri";
 import { MdOutlinePassword } from "react-icons/md";
 import { Kahoot } from "./components/title";
 import { SocketContext } from "./context/socket";
+import { MAX_GAME_CODE_LENGTH } from "./utils/game";
 
 export default function Home() {
     const [username, setUsername] = useState("");
@@ -46,7 +47,6 @@ export default function Home() {
     // Handle joining game with cleaner error handling
     const handleJoinGame = async () => {
         if (sentRequest || !validateInputs()) {
-            console.log("Invalid inputs or request already sent");
             return;
         }
 
@@ -58,7 +58,6 @@ export default function Home() {
                 "join-game",
                 { gameCode, username, token: token },
                 (response) => {
-                    console.log('join game response', response);
                     if (response && !response.success) {
                         setGameError((prev) => ({ ...prev, error: response.error || "Unknown error" }));
                         setSentRequest(false);
@@ -72,7 +71,7 @@ export default function Home() {
                     localStorage.setItem("username", username);
                     localStorage.setItem("token", response.token);
                     localStorage.setItem("game", JSON.stringify(response.gameData));
-                    router.push(response.inQueue ? "/queue" : "/waiting", undefined, { shallow: true });
+                    router.push(response.inQueue ? "/queue" : "/waiting");
                 }
             );
         } catch (error) {
@@ -85,7 +84,6 @@ export default function Home() {
 
     const attemptAutoJoin = useCallback(() => {
         if (!socket || isAlreadyInGame) {
-            console.log("Skipping auto-join: already in game or no socket");
             return;
         }
 
@@ -95,14 +93,10 @@ export default function Home() {
         const storedGameCode = localGameData?.gameSettings?.gameCode;
 
         if (!localGameData || !storedGameCode || !storedUsername || !token) {
-            console.log("Missing required data, skipping auto-join");
             return;
         }
 
-        console.log("Attempting to join game with:", { gameCode: storedGameCode, username: storedUsername, token });
-
         socket.emit("join-game", { gameCode: storedGameCode, username: storedUsername, token }, (response) => {
-            console.log('auto join game response', response);
             if (!response?.success) {
                 if (response.error === "Player already in game") {
                     setIsAlreadyInGame(true);
@@ -119,7 +113,7 @@ export default function Home() {
             localStorage.setItem("username", storedUsername);
             localStorage.setItem("token", response.token);
             localStorage.setItem("game", JSON.stringify(response.gameData));
-            router.push(response.inQueue ? "/queue" : "/waiting", undefined, { shallow: true });
+            router.push(response.inQueue ? "/queue" : "/waiting");
         });
     }, [socket, isAlreadyInGame]); // Ensure all dependencies are listed
 
@@ -150,6 +144,7 @@ export default function Home() {
                 onChange={onInputUpdate}
                 hasError={gameError.code}
                 Icon={MdOutlinePassword}
+                maxLength={MAX_GAME_CODE_LENGTH}
             />
             {hasError && (
                 <ErrorMessages

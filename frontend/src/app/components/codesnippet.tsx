@@ -3,9 +3,19 @@
 import { CopyBlock, dracula } from 'react-code-blocks';
 import React, { useEffect } from 'react';
 
-export const Codesnippet = React.forwardRef(({ clickedOutside }, ref) => {
-  const handleClickOutside = (e) => {
-    if (ref.current && !ref.current.contains(e.target)) {
+type CodesnippetProps = {
+  clickedOutside: () => void;
+};
+
+export const Codesnippet = React.forwardRef<HTMLDivElement, CodesnippetProps>((props, ref) => {
+  const { clickedOutside } = props;
+  const localRef = React.useRef<HTMLDivElement>(null);
+
+  // If a ref is forwarded, use it, otherwise use localRef
+  const combinedRef = (ref as React.RefObject<HTMLDivElement>) || localRef;
+
+  const handleClickOutside = (e: MouseEvent) => {
+    if (combinedRef.current && !combinedRef.current.contains(e.target as Node)) {
       clickedOutside();
     }
   };
@@ -15,19 +25,18 @@ export const Codesnippet = React.forwardRef(({ clickedOutside }, ref) => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [ref]);
+  }, [combinedRef]);
 
   return (
     <div className="codeSnippet absolute w-full flex justify-center items-center inset-0">
       <div className="codeSnippetEffect z-10 bg-black/60 inset-0 w-screen h-screen"></div>
-      <div className="absolute z-20" ref={ref}>
+      <div className="absolute z-20" ref={combinedRef}>
         <CopyBlock
           text={code}
           language={"javascript"}
           showLineNumbers={true}
           copied={true}
           theme={dracula}
-          wrapLines
         />
       </div>
     </div>

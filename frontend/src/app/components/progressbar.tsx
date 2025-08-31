@@ -1,4 +1,8 @@
-export const ProgressBar = ({ percentage }) => {
+type ProgressBarProps = {
+  percentage: number
+};
+
+export const ProgressBar = ({ percentage }: ProgressBarProps) => {
   return (
     <>
       <div className="relative w-full h-4 bg-gray-200 rounded-full">

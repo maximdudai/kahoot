@@ -5,8 +5,14 @@ import { useContext } from "react";
 import { SocketContext } from "@/app/context/socket";
 import { twMerge } from "tailwind-merge";
 
-export const LeaveGame = ({ className, text = "Leave Game" }) => {
+type LeaveGameProps = {
+  className?: string,
+  text?: string
+};
+
+export const LeaveGame = ({ className, text = "Leave Game" }: LeaveGameProps) => {
   const router = useRouter();
+
   const {socket, isCreator} = useContext(SocketContext);
 
   const handleLeaveGame = () => {

@@ -14,7 +14,7 @@ export default function GameQueue() {
 
   useEffect(() => {
     socket?.on("player-join-queue", () => {
-      router.push("/game", undefined, { shallow: true });
+      router.push("/game");
     });
 
     return () => {

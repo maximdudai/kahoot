@@ -10,7 +10,7 @@ import {
 } from "@/app/utils/socket";
 
 
-export const SocketContext = createContext();
+export const SocketContext = createContext(null);
 
 export default function SocketProvider({ children }) {
     const [socket, setSocket] = useState(null);
